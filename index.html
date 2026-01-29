@@ -547,7 +547,7 @@
 
         <div class="param-group">
             <label for="output-name">Output Preset Name (OP-XY)</label>
-            <input type="text" id="output-name" value="Modal Synth" style="width: 100%; box-sizing: border-box;">
+            <input type="text" id="output-name" value="PL_Perc_Plk" style="width: 100%; box-sizing: border-box;">
         </div>
 
         <div class="param-group">
@@ -1104,6 +1104,57 @@
             showStatus(`Randomized ${soundType} with 3 LFOs + Mod Envelope!`, 'success');
         }
 
+        // Generate short preset name with abbreviations
+        function generateShortPresetName() {
+            const module = document.getElementById('mi-module').value;
+            const model = document.getElementById('synthesis-model').value;
+            const soundType = document.getElementById('sound-type').value;
+
+            // Module abbreviations
+            const moduleAbbrev = {
+                'plaits': 'PL',
+                'braids': 'BR'
+            };
+
+            // Model abbreviations
+            const modelAbbrev = {
+                // Plaits
+                'plaits_pair_beater': 'Perc',
+                'plaits_virtual_analog': 'VA',
+                'plaits_waveshaping': 'Wave',
+                'plaits_fm': 'FM',
+                'plaits_grain': 'Grain',
+                'plaits_additive': 'Add',
+                'plaits_wavetable': 'WT',
+                'plaits_chords': 'Chrd',
+                // Braids
+                'braids_csaw': 'CSAW',
+                'braids_morph': 'Mrph',
+                'braids_z_saw': 'ZSaw',
+                'braids_fold': 'Fold',
+                'braids_fm': 'FM',
+                'braids_grain': 'WTBL',
+                'braids_vosim': 'Vosm',
+                'braids_noise': 'Ring'
+            };
+
+            // Sound type abbreviations
+            const typeAbbrev = {
+                'pluck': 'Plk',
+                'strings': 'Str',
+                'pad': 'Pad',
+                'lead': 'Ld',
+                'bass': 'Bs',
+                'sfx': 'FX'
+            };
+
+            const mod = moduleAbbrev[module] || module;
+            const mdl = modelAbbrev[model] || 'Syn';
+            const typ = typeAbbrev[soundType] || soundType;
+
+            return `${mod}_${mdl}_${typ}`;
+        }
+
         // Randomize button event listener
         document.getElementById('randomize-btn').addEventListener('click', () => {
             const soundType = document.getElementById('sound-type').value;
@@ -1111,22 +1162,8 @@
             const model = document.getElementById('synthesis-model').value;
             randomizeParams(soundType);
 
-            // Update output name based on sound type and model
-            const typeNames = {
-                'pluck': 'Pluck',
-                'strings': 'Strings',
-                'pad': 'Pad',
-                'lead': 'Lead',
-                'bass': 'Bass',
-                'sfx': 'SFX'
-            };
-
-            // Get model name from MI_MODULES
-            const moduleData = MI_MODULES[module];
-            const modelData = moduleData.models.find(m => m.value === model);
-            const modelName = modelData ? modelData.name.split('(')[0].trim() : 'Synth';
-
-            const outputName = `${moduleData.name} ${modelName} ${typeNames[soundType]}`;
+            // Update output name with abbreviations
+            const outputName = generateShortPresetName();
             document.getElementById('output-name').value = outputName;
         });
 
@@ -1250,21 +1287,8 @@
             randomizeEnvelope();
             randomizeAllModulation();
 
-            // Update output name
-            const typeNames = {
-                'pluck': 'Pluck',
-                'strings': 'Strings',
-                'pad': 'Pad',
-                'lead': 'Lead',
-                'bass': 'Bass',
-                'sfx': 'SFX'
-            };
-            const module = document.getElementById('mi-module').value;
-            const model = document.getElementById('synthesis-model').value;
-            const moduleData = MI_MODULES[module];
-            const modelData = moduleData.models.find(m => m.value === model);
-            const modelName = modelData ? modelData.name.split('(')[0].trim() : 'Synth';
-            const outputName = `${moduleData.name} ${modelName} ${typeNames[soundType]}`;
+            // Update output name with abbreviations
+            const outputName = generateShortPresetName();
             document.getElementById('output-name').value = outputName;
 
             showStatus('🎲 RANDOMIZED EVERYTHING! 🎲', 'success');
