@@ -640,7 +640,7 @@
             display.textContent = value.toFixed(2);
         }
 
-        // Randomize parameters based on sound type
+        // Randomize parameters based on sound type - ENHANCED for more exciting sounds
         function randomizeParams(soundType) {
             let structureRange, brightnessRange, dampingRange, positionRange;
             let attackRange, decayRange, sustainRange, releaseRange, intensityRange;
@@ -648,72 +648,72 @@
 
             switch (soundType) {
                 case 'pluck':
-                    // Pluck: instant attack, bright, natural decay
-                    structureRange = [0.05, 0.35];
-                    brightnessRange = [0.55, 0.85];
-                    dampingRange = [0.35, 0.65]; // Medium decay - not too short, not too long
-                    positionRange = [0.25, 0.75];
-                    attackRange = [0.0, 0.01]; // Instant attack
-                    decayRange = [0.15, 0.45]; // Fast to medium decay
-                    sustainRange = [0.0, 0.3]; // Low sustain (pluck decays naturally)
-                    releaseRange = [0.05, 0.25]; // Short release
-                    intensityRange = [0.7, 1.0]; // Strong pluck
-                    excitationTypes = ['impulse']; // Impulse is best for plucks
+                    // Pluck: MORE EXTREME - instant attack, varied brightness, punchy
+                    structureRange = [0.0, 0.65]; // Wider range for more timbral variety
+                    brightnessRange = [0.4, 1.0]; // From dark to super bright
+                    dampingRange = [0.2, 0.75]; // Shorter to medium decays
+                    positionRange = [0.0, 1.0]; // Full range for character
+                    attackRange = [0.0, 0.02]; // Instant to very short
+                    decayRange = [0.05, 0.6]; // Very fast to slower plucks
+                    sustainRange = [0.0, 0.4]; // Low sustain
+                    releaseRange = [0.02, 0.35]; // Tight releases
+                    intensityRange = [0.6, 1.0]; // Strong hits
+                    excitationTypes = ['impulse', 'noise']; // More variety
                     break;
                 case 'strings':
-                    // Strings: smooth attack, sustained, expressive
-                    structureRange = [0.2, 0.5];
-                    brightnessRange = [0.45, 0.75];
-                    dampingRange = [0.65, 0.85]; // Long sustain
-                    positionRange = [0.3, 0.7];
-                    attackRange = [0.08, 0.25]; // Bow attack
-                    decayRange = [0.3, 0.6];
-                    sustainRange = [0.7, 0.95]; // High sustain
-                    releaseRange = [0.25, 0.55]; // Medium release
-                    intensityRange = [0.5, 0.8];
-                    excitationTypes = ['harmonic', 'noise']; // Bowed sounds
+                    // Strings: MORE EXPRESSIVE - dynamic attack, rich harmonics
+                    structureRange = [0.0, 0.8]; // Full harmonic range
+                    brightnessRange = [0.3, 0.95]; // Dark to brilliant
+                    dampingRange = [0.5, 0.95]; // Medium to very long sustain
+                    positionRange = [0.0, 1.0]; // Full timbral control
+                    attackRange = [0.02, 0.4]; // Gentle to aggressive bowing
+                    decayRange = [0.2, 0.8];
+                    sustainRange = [0.6, 1.0]; // High sustain
+                    releaseRange = [0.15, 0.75]; // Varied releases
+                    intensityRange = [0.4, 0.95];
+                    excitationTypes = ['harmonic', 'noise', 'impulse']; // All types
                     break;
                 case 'pad':
-                    // Pad: very slow attack, long decay, atmospheric
-                    structureRange = [0.35, 0.7];
-                    brightnessRange = [0.35, 0.65]; // Darker for warmth
-                    dampingRange = [0.8, 0.95]; // Very long decay
-                    positionRange = [0.25, 0.75];
-                    attackRange = [0.35, 0.75]; // Very slow attack
-                    decayRange = [0.6, 0.9]; // Long decay
-                    sustainRange = [0.8, 0.95]; // Very high sustain
-                    releaseRange = [0.65, 0.95]; // Very long release
-                    intensityRange = [0.35, 0.65]; // Softer
+                    // Pad: EVOLVING - slow movements, deep textures
+                    structureRange = [0.2, 1.0]; // Complex harmonics
+                    brightnessRange = [0.15, 0.85]; // Dark pads to shimmering
+                    dampingRange = [0.7, 1.0]; // Long to infinite sustain
+                    positionRange = [0.0, 1.0]; // Full sweep
+                    attackRange = [0.15, 0.95]; // Slow to very slow attacks
+                    decayRange = [0.4, 1.0]; // Long evolutions
+                    sustainRange = [0.7, 1.0]; // Very high sustain
+                    releaseRange = [0.5, 1.0]; // Long tails
+                    intensityRange = [0.2, 0.75]; // Softer, more atmospheric
                     excitationTypes = ['harmonic', 'noise'];
                     break;
                 case 'lead':
-                    // Lead: bright, articulate, punchy
-                    structureRange = [0.25, 0.55];
-                    brightnessRange = [0.65, 0.9];
-                    dampingRange = [0.4, 0.65];
-                    positionRange = [0.35, 0.7];
-                    attackRange = [0.0, 0.06];
-                    decayRange = [0.2, 0.5];
-                    sustainRange = [0.55, 0.85];
-                    releaseRange = [0.15, 0.45];
-                    intensityRange = [0.6, 0.9];
+                    // Lead: AGGRESSIVE - bright, cutting, dynamic
+                    structureRange = [0.1, 0.9]; // Wide harmonic palette
+                    brightnessRange = [0.5, 1.0]; // Bright to screaming
+                    dampingRange = [0.3, 0.75]; // Punchy to sustained
+                    positionRange = [0.0, 1.0]; // Full character range
+                    attackRange = [0.0, 0.15]; // Instant to punchy
+                    decayRange = [0.1, 0.65];
+                    sustainRange = [0.4, 0.95]; // Varied sustain levels
+                    releaseRange = [0.05, 0.55];
+                    intensityRange = [0.5, 1.0]; // Strong presence
                     excitationTypes = ['impulse', 'harmonic'];
                     break;
                 case 'bass':
-                    // Bass: dark, sustained, deep
-                    structureRange = [0.0, 0.25];
-                    brightnessRange = [0.15, 0.45]; // Darker
-                    dampingRange = [0.6, 0.85]; // Longer sustain
-                    positionRange = [0.45, 0.85];
-                    attackRange = [0.0, 0.03]; // Fast attack
-                    decayRange = [0.35, 0.65];
-                    sustainRange = [0.75, 0.95]; // High sustain
-                    releaseRange = [0.35, 0.7];
-                    intensityRange = [0.75, 1.0]; // Strong
-                    excitationTypes = ['impulse', 'harmonic'];
+                    // Bass: POWERFUL - deep, rumbling, tight or loose
+                    structureRange = [0.0, 0.5]; // Fundamental to rich harmonics
+                    brightnessRange = [0.0, 0.65]; // Sub to mid-bright
+                    dampingRange = [0.4, 0.95]; // Tight to booming
+                    positionRange = [0.2, 1.0]; // Deep character
+                    attackRange = [0.0, 0.08]; // Instant to slow
+                    decayRange = [0.2, 0.85];
+                    sustainRange = [0.65, 1.0]; // High sustain
+                    releaseRange = [0.2, 0.85];
+                    intensityRange = [0.7, 1.0]; // Very strong
+                    excitationTypes = ['impulse', 'harmonic', 'noise'];
                     break;
                 case 'sfx':
-                    // SFX: completely random, experimental
+                    // SFX: WILD - completely unpredictable, extreme settings
                     structureRange = [0.0, 1.0];
                     brightnessRange = [0.0, 1.0];
                     dampingRange = [0.0, 1.0];
@@ -738,20 +738,25 @@
                     excitationTypes = ['impulse', 'noise', 'harmonic'];
             }
 
-            // No engine-specific constraints for MI modules - all models are versatile
-
-            // Generate random values within ranges
+            // Helper: biased random (can favor extremes)
             const random = (min, max) => min + Math.random() * (max - min);
+            const randomBiased = (min, max, bias = 0.5) => {
+                // bias < 0.5 favors min, bias > 0.5 favors max, 0.5 is uniform
+                const r = Math.random();
+                const biasedR = Math.pow(r, 1 / (2 * bias));
+                return min + biasedR * (max - min);
+            };
 
-            const structure = random(structureRange[0], structureRange[1]);
-            const brightness = random(brightnessRange[0], brightnessRange[1]);
-            const damping = random(dampingRange[0], dampingRange[1]);
+            // Use biased randomization for more interesting results
+            const structure = randomBiased(structureRange[0], structureRange[1], Math.random());
+            const brightness = randomBiased(brightnessRange[0], brightnessRange[1], Math.random());
+            const damping = randomBiased(dampingRange[0], dampingRange[1], Math.random());
             const position = random(positionRange[0], positionRange[1]);
-            const attack = random(attackRange[0], attackRange[1]);
+            const attack = randomBiased(attackRange[0], attackRange[1], 0.3); // Favor shorter attacks
             const decay = random(decayRange[0], decayRange[1]);
             const sustain = random(sustainRange[0], sustainRange[1]);
             const release = random(releaseRange[0], releaseRange[1]);
-            const intensity = random(intensityRange[0], intensityRange[1]);
+            const intensity = randomBiased(intensityRange[0], intensityRange[1], 0.6); // Favor higher intensity
 
             // Random excitation type from allowed types
             const excitationType = excitationTypes[Math.floor(Math.random() * excitationTypes.length)];
@@ -768,8 +773,8 @@
             setSliderValue('excitation-intensity', intensity);
             document.getElementById('excitation-type').value = excitationType;
 
-            // Randomize LFO settings (50% chance to enable)
-            const enableLFO = Math.random() > 0.5;
+            // MORE EXCITING LFO: 70% chance to enable with more extreme settings
+            const enableLFO = Math.random() > 0.3;
             document.getElementById('lfo-enabled').checked = enableLFO;
             if (enableLFO) {
                 const lfoDestinations = ['brightness', 'structure', 'position', 'damping', 'pitch'];
@@ -780,14 +785,15 @@
                 const lfoWaveform = lfoWaveforms[Math.floor(Math.random() * lfoWaveforms.length)];
                 document.getElementById('lfo-waveform').value = lfoWaveform;
 
-                const lfoRate = 0.5 + Math.random() * 8; // 0.5-8.5 Hz
+                // More extreme LFO rates and depths
+                const lfoRate = randomBiased(0.1, 15, Math.random()); // 0.1-15 Hz with bias
                 setSliderValue('lfo-rate', lfoRate);
 
-                const lfoDepth = 0.1 + Math.random() * 0.4; // 0.1-0.5 depth
+                const lfoDepth = randomBiased(0.15, 0.85, Math.random()); // 0.15-0.85 deeper modulation
                 setSliderValue('lfo-depth', lfoDepth);
             }
 
-            showStatus(`Randomized ${soundType} parameters!`, 'success');
+            showStatus(`Randomized ${soundType} parameters with enhanced variety!`, 'success');
         }
 
         // Randomize button event listener
