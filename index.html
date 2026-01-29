@@ -239,10 +239,16 @@
     <h1>MI Multisampler</h1>
     <p class="subtitle">Mutable Instruments Plaits + Braids - 16 Synthesis Models for OP-XY</p>
 
-    <div style="margin: 10px 0; display: flex; gap: 8px; justify-content: center;">
-        <button id="randomize-everything-btn" style="background: linear-gradient(180deg, #ff6b35 0%, #d94a1a 100%); border-color: #ff6b35;">🎲 Randomize EVERYTHING</button>
-        <button id="randomize-btn">🎲 Randomize Parameters</button>
-        <button id="preview-btn">▶ Preview Sound</button>
+    <div style="margin: 10px 0; display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;">
+        <button id="randomize-everything-btn" style="background: linear-gradient(180deg, #ff6b35 0%, #d94a1a 100%); border-color: #ff6b35;">🎲 Randomize ALL</button>
+        <button id="randomize-btn">🎲 Randomize</button>
+        <button id="iterate-btn" style="background: linear-gradient(180deg, #4da6ff 0%, #2f7abf 100%); border-color: #4da6ff;">🔄 Iterate</button>
+        <div style="display: flex; align-items: center; gap: 6px; background: #252525; padding: 4px 10px; border-radius: 4px; border: 1px solid #3a3a3a;">
+            <label for="iterate-amount" style="font-size: 11px; margin: 0; color: #4da6ff;">Amount:</label>
+            <input type="range" id="iterate-amount" min="0.05" max="0.5" step="0.05" value="0.15" style="width: 80px;">
+            <span id="iterate-amount-value" style="font-size: 11px; min-width: 30px; color: #e8e6e3;">15%</span>
+        </div>
+        <button id="preview-btn">▶ Preview</button>
     </div>
 
     <div class="grid-2">
@@ -881,6 +887,12 @@
             document.getElementById('mod-env-depth-value').textContent = parseFloat(e.target.value).toFixed(2);
         });
 
+        // Iterate amount slider update
+        document.getElementById('iterate-amount').addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            document.getElementById('iterate-amount-value').textContent = Math.round(value * 100) + '%';
+        });
+
         // Helper function to set slider value and update display
         function setSliderValue(sliderId, value) {
             const slider = document.getElementById(sliderId);
@@ -1104,6 +1116,109 @@
             showStatus(`Randomized ${soundType} with 3 LFOs + Mod Envelope!`, 'success');
         }
 
+        // Iterate on current sound - makes small variations
+        function iterateCurrentSound() {
+            const amount = parseFloat(document.getElementById('iterate-amount').value);
+
+            // Helper to add variation within bounds
+            function vary(currentValue, min = 0, max = 1) {
+                const range = max - min;
+                const variation = (Math.random() - 0.5) * 2 * amount * range;
+                const newValue = currentValue + variation;
+                return Math.max(min, Math.min(max, newValue));
+            }
+
+            // Iterate synthesis parameters
+            const structure = parseFloat(document.getElementById('structure').value);
+            const brightness = parseFloat(document.getElementById('brightness').value);
+            const damping = parseFloat(document.getElementById('damping').value);
+            const position = parseFloat(document.getElementById('position').value);
+
+            setSliderValue('structure', vary(structure));
+            setSliderValue('brightness', vary(brightness));
+            setSliderValue('damping', vary(damping));
+            setSliderValue('position', vary(position));
+
+            // Iterate excitation
+            const excitationIntensity = parseFloat(document.getElementById('excitation-intensity').value);
+            setSliderValue('excitation-intensity', vary(excitationIntensity));
+
+            // 30% chance to change excitation type
+            if (Math.random() < 0.3) {
+                const types = ['impulse', 'noise', 'harmonic'];
+                const currentType = document.getElementById('excitation-type').value;
+                const otherTypes = types.filter(t => t !== currentType);
+                document.getElementById('excitation-type').value = otherTypes[Math.floor(Math.random() * otherTypes.length)];
+            }
+
+            // Iterate envelope
+            const attack = parseFloat(document.getElementById('attack').value);
+            const decay = parseFloat(document.getElementById('decay').value);
+            const sustain = parseFloat(document.getElementById('sustain').value);
+            const release = parseFloat(document.getElementById('release').value);
+
+            setSliderValue('attack', vary(attack));
+            setSliderValue('decay', vary(decay));
+            setSliderValue('sustain', vary(sustain));
+            setSliderValue('release', vary(release));
+
+            // Iterate LFOs if enabled
+            for (let lfoNum = 1; lfoNum <= 3; lfoNum++) {
+                const prefix = lfoNum === 1 ? 'lfo' : `lfo${lfoNum}`;
+                const enabled = document.getElementById(`${prefix}-enabled`).checked;
+
+                if (enabled) {
+                    const rate = parseFloat(document.getElementById(`${prefix}-rate`).value);
+                    const depth = parseFloat(document.getElementById(`${prefix}-depth`).value);
+
+                    setSliderValue(`${prefix}-rate`, vary(rate, 0.1, 20));
+                    setSliderValue(`${prefix}-depth`, vary(depth, 0, 1));
+
+                    // 20% chance to change destination
+                    if (Math.random() < 0.2) {
+                        const destinations = ['brightness', 'structure', 'position', 'damping', 'pitch'];
+                        const currentDest = document.getElementById(`${prefix}-destination`).value;
+                        const otherDests = destinations.filter(d => d !== currentDest);
+                        document.getElementById(`${prefix}-destination`).value = otherDests[Math.floor(Math.random() * otherDests.length)];
+                    }
+
+                    // 20% chance to change waveform
+                    if (Math.random() < 0.2) {
+                        const waveforms = ['sine', 'triangle', 'square', 'random'];
+                        const currentWave = document.getElementById(`${prefix}-waveform`).value;
+                        const otherWaves = waveforms.filter(w => w !== currentWave);
+                        document.getElementById(`${prefix}-waveform`).value = otherWaves[Math.floor(Math.random() * otherWaves.length)];
+                    }
+                }
+            }
+
+            // Iterate Mod Envelope if enabled
+            const modEnvEnabled = document.getElementById('mod-env-enabled').checked;
+            if (modEnvEnabled) {
+                const modAttack = parseFloat(document.getElementById('mod-env-attack').value);
+                const modDecay = parseFloat(document.getElementById('mod-env-decay').value);
+                const modSustain = parseFloat(document.getElementById('mod-env-sustain').value);
+                const modRelease = parseFloat(document.getElementById('mod-env-release').value);
+                const modDepth = parseFloat(document.getElementById('mod-env-depth').value);
+
+                setSliderValue('mod-env-attack', vary(modAttack));
+                setSliderValue('mod-env-decay', vary(modDecay));
+                setSliderValue('mod-env-sustain', vary(modSustain));
+                setSliderValue('mod-env-release', vary(modRelease));
+                setSliderValue('mod-env-depth', vary(modDepth, -1, 1));
+
+                // 20% chance to change destination
+                if (Math.random() < 0.2) {
+                    const destinations = ['brightness', 'structure', 'position', 'damping', 'pitch'];
+                    const currentDest = document.getElementById('mod-env-destination').value;
+                    const otherDests = destinations.filter(d => d !== currentDest);
+                    document.getElementById('mod-env-destination').value = otherDests[Math.floor(Math.random() * otherDests.length)];
+                }
+            }
+
+            showStatus(`🔄 Iterated with ${Math.round(amount * 100)}% variation`, 'info');
+        }
+
         // Generate short preset name with abbreviations
         function generateShortPresetName() {
             const module = document.getElementById('mi-module').value;
@@ -1305,6 +1420,9 @@
         document.getElementById('randomize-lfo3-btn').addEventListener('click', () => randomizeLFO(3));
         document.getElementById('randomize-modenv-btn').addEventListener('click', randomizeModEnv);
         document.getElementById('randomize-modulation-btn').addEventListener('click', randomizeAllModulation);
+
+        // Wire up iterate button
+        document.getElementById('iterate-btn').addEventListener('click', iterateCurrentSound);
 
         // Apply LFO modulation to a parameter value
         function applyLFO(baseValue, lfoValue, depth, destination) {
