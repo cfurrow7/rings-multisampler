@@ -317,6 +317,146 @@
     </div>
 
     <div class="section">
+        <h3>LFO 2</h3>
+
+        <div class="param-group">
+            <label>
+                <input type="checkbox" id="lfo2-enabled" style="width: auto; margin-right: 8px;">
+                Enable LFO 2
+            </label>
+        </div>
+
+        <div class="param-group">
+            <label for="lfo2-destination">LFO 2 Destination</label>
+            <select id="lfo2-destination">
+                <option value="brightness">Brightness (Timbral)</option>
+                <option value="structure">Structure (Harmonic)</option>
+                <option value="position">Position (Spatial)</option>
+                <option value="damping">Damping (Decay)</option>
+                <option value="pitch">Pitch (Vibrato)</option>
+            </select>
+        </div>
+
+        <div class="param-group">
+            <label for="lfo2-waveform">LFO 2 Waveform</label>
+            <select id="lfo2-waveform">
+                <option value="sine">Sine (Smooth)</option>
+                <option value="triangle">Triangle (Linear)</option>
+                <option value="square">Square (Stepped)</option>
+                <option value="random">Random (Sample & Hold)</option>
+            </select>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">LFO 2 Rate (Hz):</span>
+            <input type="range" id="lfo2-rate" min="0.1" max="20" step="0.1" value="4">
+            <span class="slider-value" id="lfo2-rate-value">4.00</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">LFO 2 Depth:</span>
+            <input type="range" id="lfo2-depth" min="0" max="1" step="0.01" value="0.2">
+            <span class="slider-value" id="lfo2-depth-value">0.20</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>LFO 3</h3>
+
+        <div class="param-group">
+            <label>
+                <input type="checkbox" id="lfo3-enabled" style="width: auto; margin-right: 8px;">
+                Enable LFO 3
+            </label>
+        </div>
+
+        <div class="param-group">
+            <label for="lfo3-destination">LFO 3 Destination</label>
+            <select id="lfo3-destination">
+                <option value="brightness">Brightness (Timbral)</option>
+                <option value="structure">Structure (Harmonic)</option>
+                <option value="position">Position (Spatial)</option>
+                <option value="damping">Damping (Decay)</option>
+                <option value="pitch">Pitch (Vibrato)</option>
+            </select>
+        </div>
+
+        <div class="param-group">
+            <label for="lfo3-waveform">LFO 3 Waveform</label>
+            <select id="lfo3-waveform">
+                <option value="sine">Sine (Smooth)</option>
+                <option value="triangle">Triangle (Linear)</option>
+                <option value="square">Square (Stepped)</option>
+                <option value="random">Random (Sample & Hold)</option>
+            </select>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">LFO 3 Rate (Hz):</span>
+            <input type="range" id="lfo3-rate" min="0.1" max="20" step="0.1" value="0.5">
+            <span class="slider-value" id="lfo3-rate-value">0.50</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">LFO 3 Depth:</span>
+            <input type="range" id="lfo3-depth" min="0" max="1" step="0.01" value="0.15">
+            <span class="slider-value" id="lfo3-depth-value">0.15</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Modulation Envelope</h3>
+
+        <div class="param-group">
+            <label>
+                <input type="checkbox" id="mod-env-enabled" style="width: auto; margin-right: 8px;">
+                Enable Modulation Envelope
+            </label>
+        </div>
+
+        <div class="param-group">
+            <label for="mod-env-destination">Mod Envelope Destination</label>
+            <select id="mod-env-destination">
+                <option value="brightness">Brightness (Timbral)</option>
+                <option value="structure">Structure (Harmonic)</option>
+                <option value="position">Position (Spatial)</option>
+                <option value="damping">Damping (Decay)</option>
+                <option value="pitch">Pitch</option>
+            </select>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Mod Env Attack:</span>
+            <input type="range" id="mod-env-attack" min="0" max="1" step="0.01" value="0.1">
+            <span class="slider-value" id="mod-env-attack-value">0.10</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Mod Env Decay:</span>
+            <input type="range" id="mod-env-decay" min="0" max="1" step="0.01" value="0.3">
+            <span class="slider-value" id="mod-env-decay-value">0.30</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Mod Env Sustain:</span>
+            <input type="range" id="mod-env-sustain" min="0" max="1" step="0.01" value="0.5">
+            <span class="slider-value" id="mod-env-sustain-value">0.50</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Mod Env Release:</span>
+            <input type="range" id="mod-env-release" min="0" max="1" step="0.01" value="0.4">
+            <span class="slider-value" id="mod-env-release-value">0.40</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Mod Env Depth:</span>
+            <input type="range" id="mod-env-depth" min="-1" max="1" step="0.01" value="0.5">
+            <span class="slider-value" id="mod-env-depth-value">0.50</span>
+        </div>
+    </div>
+
+    <div class="section">
         <h3>Envelope & Excitation</h3>
 
         <div class="param-group">
@@ -556,6 +696,42 @@
         }
 
         // Preview a specific MIDI note
+        // Helper function to gather all modulation parameters
+        function getModulationConfig() {
+            return {
+                lfo1: {
+                    enabled: document.getElementById('lfo-enabled').checked,
+                    destination: document.getElementById('lfo-destination').value,
+                    waveform: document.getElementById('lfo-waveform').value,
+                    rate: parseFloat(document.getElementById('lfo-rate').value),
+                    depth: parseFloat(document.getElementById('lfo-depth').value)
+                },
+                lfo2: {
+                    enabled: document.getElementById('lfo2-enabled').checked,
+                    destination: document.getElementById('lfo2-destination').value,
+                    waveform: document.getElementById('lfo2-waveform').value,
+                    rate: parseFloat(document.getElementById('lfo2-rate').value),
+                    depth: parseFloat(document.getElementById('lfo2-depth').value)
+                },
+                lfo3: {
+                    enabled: document.getElementById('lfo3-enabled').checked,
+                    destination: document.getElementById('lfo3-destination').value,
+                    waveform: document.getElementById('lfo3-waveform').value,
+                    rate: parseFloat(document.getElementById('lfo3-rate').value),
+                    depth: parseFloat(document.getElementById('lfo3-depth').value)
+                },
+                modEnv: {
+                    enabled: document.getElementById('mod-env-enabled').checked,
+                    destination: document.getElementById('mod-env-destination').value,
+                    attack: parseFloat(document.getElementById('mod-env-attack').value),
+                    decay: parseFloat(document.getElementById('mod-env-decay').value),
+                    sustain: parseFloat(document.getElementById('mod-env-sustain').value),
+                    release: parseFloat(document.getElementById('mod-env-release').value),
+                    depth: parseFloat(document.getElementById('mod-env-depth').value)
+                }
+            };
+        }
+
         function previewNote(midiNote) {
             initAudio();
 
@@ -570,11 +746,8 @@
             const release = parseFloat(document.getElementById('release').value);
             const excitationType = document.getElementById('excitation-type').value;
             const excitationIntensity = parseFloat(document.getElementById('excitation-intensity').value);
-            const lfoEnabled = document.getElementById('lfo-enabled').checked;
-            const lfoDestination = document.getElementById('lfo-destination').value;
-            const lfoWaveform = document.getElementById('lfo-waveform').value;
-            const lfoRate = parseFloat(document.getElementById('lfo-rate').value);
-            const lfoDepth = parseFloat(document.getElementById('lfo-depth').value);
+
+            const modConfig = getModulationConfig();
 
             const duration = 2000;
 
@@ -583,7 +756,7 @@
                 mode, structure, brightness, damping, position,
                 attack, decay, sustain, release,
                 excitationType, excitationIntensity,
-                lfoEnabled, lfoDestination, lfoWaveform, lfoRate, lfoDepth
+                modConfig
             );
 
             const audioBuffer = audioContext.createBuffer(1, buffer.length, audioContext.sampleRate);
@@ -630,6 +803,39 @@
         });
         document.getElementById('lfo-depth').addEventListener('input', (e) => {
             document.getElementById('lfo-depth-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+
+        // LFO 2 slider updates
+        document.getElementById('lfo2-rate').addEventListener('input', (e) => {
+            document.getElementById('lfo2-rate-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('lfo2-depth').addEventListener('input', (e) => {
+            document.getElementById('lfo2-depth-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+
+        // LFO 3 slider updates
+        document.getElementById('lfo3-rate').addEventListener('input', (e) => {
+            document.getElementById('lfo3-rate-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('lfo3-depth').addEventListener('input', (e) => {
+            document.getElementById('lfo3-depth-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+
+        // Mod Envelope slider updates
+        document.getElementById('mod-env-attack').addEventListener('input', (e) => {
+            document.getElementById('mod-env-attack-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('mod-env-decay').addEventListener('input', (e) => {
+            document.getElementById('mod-env-decay-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('mod-env-sustain').addEventListener('input', (e) => {
+            document.getElementById('mod-env-sustain-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('mod-env-release').addEventListener('input', (e) => {
+            document.getElementById('mod-env-release-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('mod-env-depth').addEventListener('input', (e) => {
+            document.getElementById('mod-env-depth-value').textContent = parseFloat(e.target.value).toFixed(2);
         });
 
         // Helper function to set slider value and update display
@@ -773,7 +979,7 @@
             setSliderValue('excitation-intensity', intensity);
             document.getElementById('excitation-type').value = excitationType;
 
-            // MORE EXCITING LFO: 70% chance to enable with more extreme settings
+            // MORE EXCITING LFO 1: 70% chance to enable with more extreme settings
             const enableLFO = Math.random() > 0.3;
             document.getElementById('lfo-enabled').checked = enableLFO;
             if (enableLFO) {
@@ -793,7 +999,66 @@
                 setSliderValue('lfo-depth', lfoDepth);
             }
 
-            showStatus(`Randomized ${soundType} parameters with enhanced variety!`, 'success');
+            // LFO 2: 60% chance to enable
+            const enableLFO2 = Math.random() > 0.4;
+            document.getElementById('lfo2-enabled').checked = enableLFO2;
+            if (enableLFO2) {
+                const lfoDestinations = ['brightness', 'structure', 'position', 'damping', 'pitch'];
+                const lfo2Destination = lfoDestinations[Math.floor(Math.random() * lfoDestinations.length)];
+                document.getElementById('lfo2-destination').value = lfo2Destination;
+
+                const lfoWaveforms = ['sine', 'triangle', 'square', 'random'];
+                const lfo2Waveform = lfoWaveforms[Math.floor(Math.random() * lfoWaveforms.length)];
+                document.getElementById('lfo2-waveform').value = lfo2Waveform;
+
+                const lfo2Rate = randomBiased(0.1, 18, Math.random());
+                setSliderValue('lfo2-rate', lfo2Rate);
+
+                const lfo2Depth = randomBiased(0.1, 0.75, Math.random());
+                setSliderValue('lfo2-depth', lfo2Depth);
+            }
+
+            // LFO 3: 50% chance to enable (slower, subtler)
+            const enableLFO3 = Math.random() > 0.5;
+            document.getElementById('lfo3-enabled').checked = enableLFO3;
+            if (enableLFO3) {
+                const lfoDestinations = ['brightness', 'structure', 'position', 'damping', 'pitch'];
+                const lfo3Destination = lfoDestinations[Math.floor(Math.random() * lfoDestinations.length)];
+                document.getElementById('lfo3-destination').value = lfo3Destination;
+
+                const lfoWaveforms = ['sine', 'triangle', 'square', 'random'];
+                const lfo3Waveform = lfoWaveforms[Math.floor(Math.random() * lfoWaveforms.length)];
+                document.getElementById('lfo3-waveform').value = lfo3Waveform;
+
+                const lfo3Rate = randomBiased(0.05, 8, 0.3); // Favor slower rates
+                setSliderValue('lfo3-rate', lfo3Rate);
+
+                const lfo3Depth = randomBiased(0.05, 0.6, Math.random());
+                setSliderValue('lfo3-depth', lfo3Depth);
+            }
+
+            // Modulation Envelope: 55% chance to enable
+            const enableModEnv = Math.random() > 0.45;
+            document.getElementById('mod-env-enabled').checked = enableModEnv;
+            if (enableModEnv) {
+                const modEnvDestinations = ['brightness', 'structure', 'position', 'damping', 'pitch'];
+                const modEnvDestination = modEnvDestinations[Math.floor(Math.random() * modEnvDestinations.length)];
+                document.getElementById('mod-env-destination').value = modEnvDestination;
+
+                const modEnvAttack = random(0.0, 0.8);
+                const modEnvDecay = random(0.1, 0.9);
+                const modEnvSustain = random(0.0, 0.9);
+                const modEnvRelease = random(0.1, 0.95);
+                const modEnvDepth = randomBiased(-0.8, 0.8, Math.random()); // Can be negative!
+
+                setSliderValue('mod-env-attack', modEnvAttack);
+                setSliderValue('mod-env-decay', modEnvDecay);
+                setSliderValue('mod-env-sustain', modEnvSustain);
+                setSliderValue('mod-env-release', modEnvRelease);
+                setSliderValue('mod-env-depth', modEnvDepth);
+            }
+
+            showStatus(`Randomized ${soundType} with 3 LFOs + Mod Envelope!`, 'success');
         }
 
         // Randomize button event listener
@@ -2443,7 +2708,7 @@
         }
 
         // Main sample generation function
-        function generateSample(midiNote, sampleRate, durationMs, mode, structure, brightness, damping, position, attack, decay, sustain, release, excitationType, excitationIntensity, lfoEnabled, lfoDestination, lfoWaveform, lfoRate, lfoDepth) {
+        function generateSample(midiNote, sampleRate, durationMs, mode, structure, brightness, damping, position, attack, decay, sustain, release, excitationType, excitationIntensity, modConfig) {
             const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
             const numSamples = Math.floor(sampleRate * durationMs / 1000);
 
@@ -2451,11 +2716,15 @@
             const adsrEnvelope = generateEnvelope(numSamples, sampleRate, attack, decay, sustain, release, durationMs);
             const excitationSignal = generateExcitation(numSamples, sampleRate, excitationType, excitationIntensity, frequency, position);
 
-            // Generate LFO if enabled
+            // Generate LFO signals
             let lfo = null;
-            if (lfoEnabled) {
-                lfo = generateLFO(numSamples, sampleRate, lfoRate, lfoWaveform);
+            if (modConfig.lfo1.enabled) {
+                lfo = generateLFO(numSamples, sampleRate, modConfig.lfo1.rate, modConfig.lfo1.waveform);
             }
+
+            // For now, pass LFO1 to synthesis engines (future: combine all modulations)
+            const lfoDestination = modConfig.lfo1.destination;
+            const lfoDepth = modConfig.lfo1.depth;
 
             // Call appropriate synthesis function based on model
             switch (mode) {
@@ -2516,11 +2785,8 @@
             const release = parseFloat(document.getElementById('release').value);
             const excitationType = document.getElementById('excitation-type').value;
             const excitationIntensity = parseFloat(document.getElementById('excitation-intensity').value);
-            const lfoEnabled = document.getElementById('lfo-enabled').checked;
-            const lfoDestination = document.getElementById('lfo-destination').value;
-            const lfoWaveform = document.getElementById('lfo-waveform').value;
-            const lfoRate = parseFloat(document.getElementById('lfo-rate').value);
-            const lfoDepth = parseFloat(document.getElementById('lfo-depth').value);
+
+            const modConfig = getModulationConfig();
 
             const midiNote = 60; // Middle C
             const duration = 2000; // 2 seconds
@@ -2540,11 +2806,7 @@
                 release,
                 excitationType,
                 excitationIntensity,
-                lfoEnabled,
-                lfoDestination,
-                lfoWaveform,
-                lfoRate,
-                lfoDepth
+                modConfig
             );
 
             const audioBuffer = audioContext.createBuffer(1, buffer.length, audioContext.sampleRate);
@@ -2724,11 +2986,7 @@
                 const release = parseFloat(document.getElementById('release').value);
                 const excitationType = document.getElementById('excitation-type').value;
                 const excitationIntensity = parseFloat(document.getElementById('excitation-intensity').value);
-                const lfoEnabled = document.getElementById('lfo-enabled').checked;
-                const lfoDestination = document.getElementById('lfo-destination').value;
-                const lfoWaveform = document.getElementById('lfo-waveform').value;
-                const lfoRate = parseFloat(document.getElementById('lfo-rate').value);
-                const lfoDepth = parseFloat(document.getElementById('lfo-depth').value);
+                const modConfig = getModulationConfig();
                 const outputName = document.getElementById('output-name').value.trim();
                 const duration = parseInt(document.getElementById('duration').value);
                 const minNote = parseInt(document.getElementById('min-note').value);
@@ -2776,11 +3034,7 @@
                         release,
                         excitationType,
                         excitationIntensity,
-                        lfoEnabled,
-                        lfoDestination,
-                        lfoWaveform,
-                        lfoRate,
-                        lfoDepth
+                        modConfig
                     );
                     bufs.set(midiNote, buf);
                 }
