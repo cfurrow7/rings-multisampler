@@ -237,7 +237,7 @@
 </head>
 <body>
     <h1>MI Multisampler</h1>
-    <p class="subtitle">Mutable Instruments Plaits + Braids - 16 Synthesis Models for OP-XY</p>
+    <p class="subtitle">Mutable Instruments Plaits + Braids + Beads - 24 Synthesis Models for OP-XY</p>
 
     <div style="margin: 10px 0; display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;">
         <button id="randomize-everything-btn" style="background: linear-gradient(180deg, #ff6b35 0%, #d94a1a 100%); border-color: #ff6b35;">🎲 Randomize ALL</button>
@@ -270,6 +270,7 @@
                 <select id="mi-module">
                     <option value="plaits">Plaits</option>
                     <option value="braids">Braids</option>
+                    <option value="beads">Beads</option>
                 </select>
             </div>
 
@@ -703,6 +704,19 @@
                     { value: 'braids_grain', name: 'WTBL (wavetable)' },
                     { value: 'braids_vosim', name: 'VOSIM (vocal synthesis)' },
                     { value: 'braids_noise', name: 'RING (ring modulator)' }
+                ]
+            },
+            beads: {
+                name: 'Beads',
+                models: [
+                    { value: 'beads_granular', name: 'Granular (classic texture)' },
+                    { value: 'beads_pitchshift', name: 'Pitch Shifter (granular delay)' },
+                    { value: 'beads_lofi', name: 'Lo-Fi (bit crushing grains)' },
+                    { value: 'beads_reverb', name: 'Reverb (granular clouds)' },
+                    { value: 'beads_delay', name: 'Delay (grain feedback)' },
+                    { value: 'beads_freeze', name: 'Freeze (infinite sustain)' },
+                    { value: 'beads_scatter', name: 'Scatter (random grains)' },
+                    { value: 'beads_glitch', name: 'Glitch (chaotic grains)' }
                 ]
             }
         };
@@ -1304,7 +1318,8 @@
             // Module abbreviations
             const moduleAbbrev = {
                 'plaits': 'PL',
-                'braids': 'BR'
+                'braids': 'BR',
+                'beads': 'BD'
             };
 
             // Model abbreviations
@@ -1326,7 +1341,16 @@
                 'braids_fm': 'FM',
                 'braids_grain': 'WTBL',
                 'braids_vosim': 'Vosm',
-                'braids_noise': 'Ring'
+                'braids_noise': 'Ring',
+                // Beads
+                'beads_granular': 'Gran',
+                'beads_pitchshift': 'Pitch',
+                'beads_lofi': 'LoFi',
+                'beads_reverb': 'Verb',
+                'beads_delay': 'Dly',
+                'beads_freeze': 'Frz',
+                'beads_scatter': 'Sctr',
+                'beads_glitch': 'Gltch'
             };
 
             // Sound type abbreviations
@@ -1367,7 +1391,7 @@
 
         // Individual section randomization functions
         function randomizeEngine() {
-            const modules = ['plaits', 'braids'];
+            const modules = ['plaits', 'braids', 'beads'];
             const randomModule = modules[Math.floor(Math.random() * modules.length)];
             document.getElementById('mi-module').value = randomModule;
             updateSynthesisModels(); // Update the model dropdown
@@ -3134,6 +3158,472 @@
             return buffer;
         }
 
+        // ===== BEADS GRANULAR SYNTHESIS ENGINES =====
+
+        // Beads: Classic Granular Texture
+        function generateBeadsGranular(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Grain parameters
+                const grainSize = 0.01 + modStructure * 0.09; // 10-100ms
+                const grainDensity = 10 + modBrightness * 90; // 10-100 grains/sec
+                const grainPitch = modFrequency;
+                const grainSpread = position; // Stereo/temporal spread
+
+                // Generate grains
+                const grainInterval = 1 / grainDensity;
+                const grainPhase = (t % grainInterval) / grainInterval;
+                const grainEnvelope = Math.sin(Math.PI * grainPhase);
+
+                // Grain content: oscillator
+                const grainOsc = Math.sin(2 * Math.PI * grainPitch * t * (1 + grainSpread * (Math.random() - 0.5) * 0.1));
+
+                const grain = grainOsc * grainEnvelope * (grainPhase < grainSize / grainInterval ? 1 : 0);
+
+                // Damping/feedback
+                const decay = Math.exp(-(1 - modDamping) * 0.0003 * sample);
+
+                buffer[sample] = grain * decay * adsrEnvelope[sample] * 0.6;
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= 0.7 / maxAmp;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Beads: Pitch Shifter (granular delay with pitch)
+        function generateBeadsPitchshift(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Create source material
+            const sourceBuffer = new Float32Array(numSamples);
+            for (let i = 0; i < numSamples; i++) {
+                const t = i / sampleRate;
+                sourceBuffer[i] = Math.sin(2 * Math.PI * baseFrequency * t) +
+                                 0.5 * Math.sin(2 * Math.PI * baseFrequency * 2 * t);
+            }
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                    }
+                }
+
+                // Pitch shift amount (-1 octave to +1 octave)
+                const pitchShift = (modStructure - 0.5) * 2;
+                const pitchRatio = Math.pow(2, pitchShift);
+
+                // Grain size based on brightness
+                const grainSize = Math.floor(sampleRate * (0.02 + modBrightness * 0.08));
+
+                // Read from source with pitch shift
+                const readPos = (sample * pitchRatio) % sourceBuffer.length;
+                const readIndex = Math.floor(readPos);
+                const frac = readPos - readIndex;
+
+                const val1 = sourceBuffer[readIndex] || 0;
+                const val2 = sourceBuffer[(readIndex + 1) % sourceBuffer.length] || 0;
+                const grain = val1 * (1 - frac) + val2 * frac;
+
+                // Grain envelope
+                const grainPhase = (sample % grainSize) / grainSize;
+                const env = Math.sin(Math.PI * grainPhase);
+
+                const decay = Math.exp(-(1 - modDamping) * 0.0004 * sample);
+
+                buffer[sample] = grain * env * decay * adsrEnvelope[sample] * 0.5;
+            }
+
+            return buffer;
+        }
+
+        // Beads: Lo-Fi (bit crushing grains)
+        function generateBeadsLofi(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Bit depth reduction (structure)
+                const bitDepth = Math.floor(3 + (1 - modStructure) * 13); // 3-16 bits
+
+                // Sample rate reduction (brightness)
+                const sampleRateReduction = Math.floor(1 + (1 - modBrightness) * 31); // 1-32x reduction
+
+                // Generate base signal
+                let signal = Math.sin(2 * Math.PI * modFrequency * t);
+
+                // Apply sample rate reduction (sample & hold)
+                if (sample % sampleRateReduction !== 0) {
+                    const lastSample = Math.floor(sample / sampleRateReduction) * sampleRateReduction;
+                    signal = buffer[lastSample] / (adsrEnvelope[lastSample] || 1);
+                }
+
+                // Apply bit depth reduction
+                const levels = Math.pow(2, bitDepth);
+                signal = Math.round(signal * levels / 2) / (levels / 2);
+
+                const decay = Math.exp(-(1 - modDamping) * 0.0005 * sample);
+
+                buffer[sample] = signal * decay * adsrEnvelope[sample] * 0.5;
+            }
+
+            return buffer;
+        }
+
+        // Beads: Reverb (granular clouds)
+        function generateBeadsReverb(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Multiple grain clouds for reverb effect
+            const numClouds = 8;
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                let value = 0;
+
+                // Create multiple delayed/detuned grain clouds
+                for (let cloud = 0; cloud < numClouds; cloud++) {
+                    const delayTime = modStructure * 0.1 * (cloud / numClouds); // 0-100ms delay
+                    const delaySamples = delayTime * sampleRate;
+                    const delayedSample = sample - delaySamples;
+
+                    if (delayedSample >= 0) {
+                        const cloudPhase = (t * (5 + cloud * 2)) % 1;
+                        const cloudEnv = Math.sin(Math.PI * cloudPhase);
+
+                        const detune = 1 + (cloud - numClouds / 2) / numClouds * modBrightness * 0.1;
+                        const cloudOsc = Math.sin(2 * Math.PI * modFrequency * detune * t);
+
+                        value += cloudOsc * cloudEnv * 0.3 / numClouds;
+                    }
+                }
+
+                // Long decay for reverb
+                const decay = Math.exp(-(1 - modDamping) * 0.0002 * sample);
+
+                buffer[sample] = value * decay * adsrEnvelope[sample];
+            }
+
+            return buffer;
+        }
+
+        // Beads: Delay (grain feedback)
+        function generateBeadsDelay(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Delay time (structure)
+                const delayTime = 0.05 + modStructure * 0.45; // 50-500ms
+                const delaySamples = delayTime * sampleRate;
+
+                // Feedback amount (damping)
+                const feedback = modDamping * 0.8;
+
+                // Fresh signal
+                const fresh = Math.sin(2 * Math.PI * modFrequency * t) * Math.exp(-t * 5);
+
+                // Delayed signal with feedback
+                let delayed = 0;
+                const delayedIndex = sample - Math.floor(delaySamples);
+                if (delayedIndex >= 0) {
+                    delayed = buffer[delayedIndex] * feedback;
+                }
+
+                // Brightness affects high-frequency rolloff
+                const hfRolloff = 1 - (1 - modBrightness) * 0.3;
+                delayed *= hfRolloff;
+
+                buffer[sample] = (fresh + delayed) * adsrEnvelope[sample] * 0.5;
+            }
+
+            return buffer;
+        }
+
+        // Beads: Freeze (infinite sustain)
+        function generateBeadsFreeze(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Create frozen buffer (loop)
+            const loopSize = Math.floor(sampleRate * 0.1); // 100ms loop
+            const loopBuffer = new Float32Array(loopSize);
+
+            for (let i = 0; i < loopSize; i++) {
+                const t = i / sampleRate;
+                loopBuffer[i] = Math.sin(2 * Math.PI * baseFrequency * t) +
+                               0.3 * Math.sin(2 * Math.PI * baseFrequency * 3 * t) +
+                               0.2 * Math.sin(2 * Math.PI * baseFrequency * 5 * t);
+            }
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                    }
+                }
+
+                // Loop position with pitch variation
+                const pitchVar = 1 + (modStructure - 0.5) * 0.5;
+                const loopPos = (sample * pitchVar) % loopSize;
+                const loopIndex = Math.floor(loopPos);
+                const frac = loopPos - loopIndex;
+
+                const val1 = loopBuffer[loopIndex];
+                const val2 = loopBuffer[(loopIndex + 1) % loopSize];
+                let frozen = val1 * (1 - frac) + val2 * frac;
+
+                // Brightness filter
+                const filterAmt = modBrightness;
+                frozen *= filterAmt;
+
+                // Minimal decay for "frozen" effect
+                const decay = Math.exp(-(1 - modDamping) * 0.0001 * sample);
+
+                buffer[sample] = frozen * decay * adsrEnvelope[sample] * 0.6;
+            }
+
+            return buffer;
+        }
+
+        // Beads: Scatter (random grains)
+        function generateBeadsScatter(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Random grain triggering
+                const grainDensity = modStructure; // 0-1
+                const triggerGrain = Math.random() < grainDensity * 0.1;
+
+                if (triggerGrain) {
+                    // Random grain parameters
+                    const grainLength = Math.floor(sampleRate * (0.01 + Math.random() * 0.09));
+                    const grainPitch = modFrequency * (0.5 + Math.random() * 1.5);
+                    const grainAmp = 0.3 + Math.random() * 0.7;
+
+                    // Fill grain
+                    for (let g = 0; g < grainLength && (sample + g) < numSamples; g++) {
+                        const grainPhase = g / grainLength;
+                        const grainEnv = Math.sin(Math.PI * grainPhase);
+                        const grainOsc = Math.sin(2 * Math.PI * grainPitch * (t + g / sampleRate));
+
+                        buffer[sample + g] += grainOsc * grainEnv * grainAmp * modBrightness;
+                    }
+                }
+
+                const decay = Math.exp(-(1 - modDamping) * 0.0006 * sample);
+                buffer[sample] *= decay * adsrEnvelope[sample];
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= 0.6 / maxAmp;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Beads: Glitch (chaotic grains)
+        function generateBeadsGlitch(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Chaotic modulation
+                const chaos = modStructure;
+                const randomJump = Math.random() < chaos * 0.05;
+
+                // Glitchy grain
+                const grainRate = 50 + modBrightness * 150; // 50-200 Hz
+                const grainPhase = (t * grainRate) % 1;
+
+                // Random pitch jumps
+                let glitchPitch = modFrequency;
+                if (randomJump) {
+                    glitchPitch *= Math.pow(2, Math.floor(Math.random() * 5 - 2)); // Random octaves
+                }
+
+                // Glitchy oscillator with sample & hold
+                const grainEnv = grainPhase < 0.5 ? 1 : -1; // Square wave envelope
+                const osc = Math.sin(2 * Math.PI * glitchPitch * t);
+
+                // Stutter/repeat effect
+                const stutter = Math.floor(t * grainRate * (1 + chaos * 2)) % 2 === 0 ? 1 : 0.3;
+
+                let value = osc * grainEnv * stutter;
+
+                // Random muting
+                if (Math.random() < chaos * 0.1) {
+                    value *= 0.1;
+                }
+
+                const decay = Math.exp(-(1 - modDamping) * 0.0005 * sample);
+
+                buffer[sample] = value * decay * adsrEnvelope[sample] * 0.4;
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= 0.6 / maxAmp;
+                }
+            }
+
+            return buffer;
+        }
+
         // Main sample generation function
         function generateSample(midiNote, sampleRate, durationMs, mode, structure, brightness, damping, position, attack, decay, sustain, release, excitationType, excitationIntensity, modConfig) {
             const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
@@ -3190,6 +3680,24 @@
                     return generateBraidsVosim(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
                 case 'braids_noise':
                     return generateBraidsNoise(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+
+                // Beads models (granular)
+                case 'beads_granular':
+                    return generateBeadsGranular(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'beads_pitchshift':
+                    return generateBeadsPitchshift(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'beads_lofi':
+                    return generateBeadsLofi(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'beads_reverb':
+                    return generateBeadsReverb(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'beads_delay':
+                    return generateBeadsDelay(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'beads_freeze':
+                    return generateBeadsFreeze(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'beads_scatter':
+                    return generateBeadsScatter(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'beads_glitch':
+                    return generateBeadsGlitch(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
 
                 // Default to first Plaits model
                 default:
