@@ -239,70 +239,77 @@
     <h1>MI Multisampler</h1>
     <p class="subtitle">Mutable Instruments Plaits + Braids - 16 Synthesis Models for OP-XY</p>
 
-    <div class="section">
-        <h3>MI Module & Parameters</h3>
+    <div style="margin: 10px 0; display: flex; gap: 8px; justify-content: center;">
+        <button id="randomize-everything-btn" style="background: linear-gradient(180deg, #ff6b35 0%, #d94a1a 100%); border-color: #ff6b35;">🎲 Randomize EVERYTHING</button>
+        <button id="randomize-btn">🎲 Randomize Parameters</button>
+        <button id="preview-btn">▶ Preview Sound</button>
+    </div>
 
-        <div class="param-group">
-            <label for="mi-module">MI Module</label>
-            <select id="mi-module">
-                <option value="plaits">Plaits (Macro Oscillator)</option>
-                <option value="braids">Braids (Macro Oscillator)</option>
-            </select>
-        </div>
+    <div class="grid-2">
+        <div class="section">
+            <h3>Engine Selection <button id="randomize-engine-btn" style="float: right; padding: 2px 8px; font-size: 10px; margin: 0;">🎲</button></h3>
 
-        <div class="param-group">
-            <label for="synthesis-model">Synthesis Model</label>
-            <select id="synthesis-model">
-                <!-- Populated dynamically based on module selection -->
-            </select>
-        </div>
-
-        <div class="param-group">
-            <label for="sound-type">Randomize Sound Type</label>
-            <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
-                <select id="sound-type" style="flex: 1;">
-                    <option value="pluck">Pluck (Guitar, Bass, Pizzicato)</option>
-                    <option value="strings">Strings (Bowed, Sustained)</option>
-                    <option value="pad">Pad (Long Decay, Atmospheric)</option>
-                    <option value="lead">Lead (Bright, Articulate)</option>
-                    <option value="bass">Bass (Dark, Sustained)</option>
-                    <option value="sfx">SFX (Random, Experimental)</option>
+            <div class="param-group">
+                <label for="mi-module">MI Module</label>
+                <select id="mi-module">
+                    <option value="plaits">Plaits</option>
+                    <option value="braids">Braids</option>
                 </select>
-                <button id="randomize-btn" style="margin: 0;">Randomize</button>
+            </div>
+
+            <div class="param-group">
+                <label for="synthesis-model">Model</label>
+                <select id="synthesis-model">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <div class="param-group">
+                <label for="sound-type">Sound Type</label>
+                <select id="sound-type">
+                    <option value="pluck">Pluck</option>
+                    <option value="strings">Strings</option>
+                    <option value="pad">Pad</option>
+                    <option value="lead">Lead</option>
+                    <option value="bass">Bass</option>
+                    <option value="sfx">SFX</option>
+                </select>
             </div>
         </div>
 
-        <div class="slider-container">
-            <span class="slider-label">Structure:</span>
-            <input type="range" id="structure" min="0" max="1" step="0.01" value="0.5">
-            <span class="slider-value" id="structure-value">0.50</span>
-        </div>
+        <div class="section">
+            <h3>Synthesis Parameters <button id="randomize-synth-btn" style="float: right; padding: 2px 8px; font-size: 10px; margin: 0;">🎲</button></h3>
 
-        <div class="slider-container">
-            <span class="slider-label">Brightness:</span>
-            <input type="range" id="brightness" min="0" max="1" step="0.01" value="0.5">
-            <span class="slider-value" id="brightness-value">0.50</span>
-        </div>
+            <div class="slider-container">
+                <span class="slider-label">Structure:</span>
+                <input type="range" id="structure" min="0" max="1" step="0.01" value="0.5">
+                <span class="slider-value" id="structure-value">0.50</span>
+            </div>
 
-        <div class="slider-container">
-            <span class="slider-label">Damping:</span>
-            <input type="range" id="damping" min="0" max="1" step="0.01" value="0.5">
-            <span class="slider-value" id="damping-value">0.50</span>
-        </div>
+            <div class="slider-container">
+                <span class="slider-label">Brightness:</span>
+                <input type="range" id="brightness" min="0" max="1" step="0.01" value="0.5">
+                <span class="slider-value" id="brightness-value">0.50</span>
+            </div>
 
-        <div class="slider-container">
-            <span class="slider-label">Position:</span>
-            <input type="range" id="position" min="0" max="1" step="0.01" value="0.5">
-            <span class="slider-value" id="position-value">0.50</span>
-        </div>
+            <div class="slider-container">
+                <span class="slider-label">Damping:</span>
+                <input type="range" id="damping" min="0" max="1" step="0.01" value="0.5">
+                <span class="slider-value" id="damping-value">0.50</span>
+            </div>
 
-        <button id="preview-btn">Preview Sound</button>
+            <div class="slider-container">
+                <span class="slider-label">Position:</span>
+                <input type="range" id="position" min="0" max="1" step="0.01" value="0.5">
+                <span class="slider-value" id="position-value">0.50</span>
+            </div>
+        </div>
     </div>
 
-    <h3 style="color: #ff914d; margin: 15px 0 8px 0;">Modulation</h3>
+    <h3 style="color: #ff914d; margin: 15px 0 8px 0;">Modulation <button id="randomize-modulation-btn" style="float: right; padding: 4px 12px; font-size: 11px; margin: 0;">🎲 Randomize All</button></h3>
     <div class="grid-container">
     <div class="section">
-        <h3>LFO 1</h3>
+        <h3>LFO 1 <button id="randomize-lfo1-btn" style="float: right; padding: 2px 8px; font-size: 10px; margin: 0;">🎲</button></h3>
 
         <div class="param-group">
             <label>
@@ -346,7 +353,7 @@
     </div>
 
     <div class="section">
-        <h3>LFO 2</h3>
+        <h3>LFO 2 <button id="randomize-lfo2-btn" style="float: right; padding: 2px 8px; font-size: 10px; margin: 0;">🎲</button></h3>
 
         <div class="param-group">
             <label>
@@ -390,7 +397,7 @@
     </div>
 
     <div class="section">
-        <h3>LFO 3</h3>
+        <h3>LFO 3 <button id="randomize-lfo3-btn" style="float: right; padding: 2px 8px; font-size: 10px; margin: 0;">🎲</button></h3>
 
         <div class="param-group">
             <label>
@@ -434,7 +441,7 @@
     </div>
 
     <div class="section">
-        <h3>Modulation Envelope</h3>
+        <h3>Mod Envelope <button id="randomize-modenv-btn" style="float: right; padding: 2px 8px; font-size: 10px; margin: 0;">🎲</button></h3>
 
         <div class="param-group">
             <label>
@@ -486,46 +493,52 @@
     </div>
     </div>
 
-    <div class="section">
-        <h3>Envelope & Excitation</h3>
+    <div class="grid-2">
+        <div class="section">
+            <h3>Excitation <button id="randomize-excitation-btn" style="float: right; padding: 2px 8px; font-size: 10px; margin: 0;">🎲</button></h3>
 
-        <div class="param-group">
-            <label for="excitation-type">Excitation Type</label>
-            <select id="excitation-type">
-                <option value="impulse">Impulse (Short Strike)</option>
-                <option value="noise">Noise Burst</option>
-                <option value="harmonic">Harmonic (Pitched)</option>
-            </select>
+            <div class="param-group">
+                <label for="excitation-type">Type</label>
+                <select id="excitation-type">
+                    <option value="impulse">Impulse</option>
+                    <option value="noise">Noise</option>
+                    <option value="harmonic">Harmonic</option>
+                </select>
+            </div>
+
+            <div class="slider-container">
+                <span class="slider-label">Intensity:</span>
+                <input type="range" id="excitation-intensity" min="0" max="1" step="0.01" value="0.5">
+                <span class="slider-value" id="excitation-intensity-value">0.50</span>
+            </div>
         </div>
 
-        <div class="slider-container">
-            <span class="slider-label">Excitation Intensity:</span>
-            <input type="range" id="excitation-intensity" min="0" max="1" step="0.01" value="0.5">
-            <span class="slider-value" id="excitation-intensity-value">0.50</span>
-        </div>
+        <div class="section">
+            <h3>Amplitude Envelope <button id="randomize-envelope-btn" style="float: right; padding: 2px 8px; font-size: 10px; margin: 0;">🎲</button></h3>
 
-        <div class="slider-container">
-            <span class="slider-label">Attack:</span>
-            <input type="range" id="attack" min="0" max="1" step="0.01" value="0.01">
-            <span class="slider-value" id="attack-value">0.01</span>
-        </div>
+            <div class="slider-container">
+                <span class="slider-label">Attack:</span>
+                <input type="range" id="attack" min="0" max="1" step="0.01" value="0.01">
+                <span class="slider-value" id="attack-value">0.01</span>
+            </div>
 
-        <div class="slider-container">
-            <span class="slider-label">Decay:</span>
-            <input type="range" id="decay" min="0" max="1" step="0.01" value="0.3">
-            <span class="slider-value" id="decay-value">0.30</span>
-        </div>
+            <div class="slider-container">
+                <span class="slider-label">Decay:</span>
+                <input type="range" id="decay" min="0" max="1" step="0.01" value="0.3">
+                <span class="slider-value" id="decay-value">0.30</span>
+            </div>
 
-        <div class="slider-container">
-            <span class="slider-label">Sustain:</span>
-            <input type="range" id="sustain" min="0" max="1" step="0.01" value="0.7">
-            <span class="slider-value" id="sustain-value">0.70</span>
-        </div>
+            <div class="slider-container">
+                <span class="slider-label">Sustain:</span>
+                <input type="range" id="sustain" min="0" max="1" step="0.01" value="0.7">
+                <span class="slider-value" id="sustain-value">0.70</span>
+            </div>
 
-        <div class="slider-container">
-            <span class="slider-label">Release:</span>
-            <input type="range" id="release" min="0" max="1" step="0.01" value="0.5">
-            <span class="slider-value" id="release-value">0.50</span>
+            <div class="slider-container">
+                <span class="slider-label">Release:</span>
+                <input type="range" id="release" min="0" max="1" step="0.01" value="0.5">
+                <span class="slider-value" id="release-value">0.50</span>
+            </div>
         </div>
     </div>
 
@@ -1116,6 +1129,158 @@
             const outputName = `${moduleData.name} ${modelName} ${typeNames[soundType]}`;
             document.getElementById('output-name').value = outputName;
         });
+
+        // Individual section randomization functions
+        function randomizeEngine() {
+            const modules = ['plaits', 'braids'];
+            const randomModule = modules[Math.floor(Math.random() * modules.length)];
+            document.getElementById('mi-module').value = randomModule;
+            updateSynthesisModels(); // Update the model dropdown
+
+            // Pick random model from the new module
+            const modelSelect = document.getElementById('synthesis-model');
+            const randomModelIndex = Math.floor(Math.random() * modelSelect.options.length);
+            modelSelect.selectedIndex = randomModelIndex;
+
+            // Random sound type
+            const soundTypes = ['pluck', 'strings', 'pad', 'lead', 'bass', 'sfx'];
+            const randomType = soundTypes[Math.floor(Math.random() * soundTypes.length)];
+            document.getElementById('sound-type').value = randomType;
+
+            showStatus('Randomized engine selection!', 'success');
+        }
+
+        function randomizeSynthParams() {
+            const random = (min, max) => min + Math.random() * (max - min);
+            setSliderValue('structure', random(0, 1));
+            setSliderValue('brightness', random(0, 1));
+            setSliderValue('damping', random(0, 1));
+            setSliderValue('position', random(0, 1));
+            showStatus('Randomized synthesis parameters!', 'success');
+        }
+
+        function randomizeExcitation() {
+            const types = ['impulse', 'noise', 'harmonic'];
+            document.getElementById('excitation-type').value = types[Math.floor(Math.random() * types.length)];
+            setSliderValue('excitation-intensity', Math.random());
+            showStatus('Randomized excitation!', 'success');
+        }
+
+        function randomizeEnvelope() {
+            const random = (min, max) => min + Math.random() * (max - min);
+            setSliderValue('attack', random(0, 0.8));
+            setSliderValue('decay', random(0.1, 0.9));
+            setSliderValue('sustain', random(0, 0.95));
+            setSliderValue('release', random(0.1, 0.95));
+            showStatus('Randomized amplitude envelope!', 'success');
+        }
+
+        function randomizeLFO(lfoNum) {
+            const random = (min, max) => min + Math.random() * (max - min);
+            const randomBiased = (min, max, bias = 0.5) => {
+                const r = Math.random();
+                const biasedR = Math.pow(r, 1 / (2 * bias));
+                return min + biasedR * (max - min);
+            };
+
+            const prefix = lfoNum === 1 ? 'lfo' : `lfo${lfoNum}`;
+            const enableCheckbox = document.getElementById(`${prefix}-enabled`);
+            const destSelect = document.getElementById(`${prefix}-destination`);
+            const waveSelect = document.getElementById(`${prefix}-waveform`);
+
+            // 80% chance to enable
+            enableCheckbox.checked = Math.random() > 0.2;
+
+            if (enableCheckbox.checked) {
+                const destinations = ['brightness', 'structure', 'position', 'damping', 'pitch'];
+                destSelect.value = destinations[Math.floor(Math.random() * destinations.length)];
+
+                const waveforms = ['sine', 'triangle', 'square', 'random'];
+                waveSelect.value = waveforms[Math.floor(Math.random() * waveforms.length)];
+
+                const rate = randomBiased(0.1, 15, Math.random());
+                const depth = randomBiased(0.1, 0.85, Math.random());
+
+                setSliderValue(`${prefix}-rate`, rate);
+                setSliderValue(`${prefix}-depth`, depth);
+            }
+
+            showStatus(`Randomized LFO ${lfoNum}!`, 'success');
+        }
+
+        function randomizeModEnv() {
+            const random = (min, max) => min + Math.random() * (max - min);
+            const randomBiased = (min, max, bias = 0.5) => {
+                const r = Math.random();
+                const biasedR = Math.pow(r, 1 / (2 * bias));
+                return min + biasedR * (max - min);
+            };
+
+            const enableCheckbox = document.getElementById('mod-env-enabled');
+            enableCheckbox.checked = Math.random() > 0.3;
+
+            if (enableCheckbox.checked) {
+                const destinations = ['brightness', 'structure', 'position', 'damping', 'pitch'];
+                document.getElementById('mod-env-destination').value = destinations[Math.floor(Math.random() * destinations.length)];
+
+                setSliderValue('mod-env-attack', random(0, 0.8));
+                setSliderValue('mod-env-decay', random(0.1, 0.9));
+                setSliderValue('mod-env-sustain', random(0, 0.9));
+                setSliderValue('mod-env-release', random(0.1, 0.95));
+                setSliderValue('mod-env-depth', randomBiased(-0.8, 0.8, Math.random()));
+            }
+
+            showStatus('Randomized modulation envelope!', 'success');
+        }
+
+        function randomizeAllModulation() {
+            randomizeLFO(1);
+            randomizeLFO(2);
+            randomizeLFO(3);
+            randomizeModEnv();
+            showStatus('Randomized all modulation sources!', 'success');
+        }
+
+        function randomizeEverything() {
+            randomizeEngine();
+            const soundType = document.getElementById('sound-type').value;
+            randomizeParams(soundType); // Uses existing comprehensive randomization
+            randomizeSynthParams();
+            randomizeExcitation();
+            randomizeEnvelope();
+            randomizeAllModulation();
+
+            // Update output name
+            const typeNames = {
+                'pluck': 'Pluck',
+                'strings': 'Strings',
+                'pad': 'Pad',
+                'lead': 'Lead',
+                'bass': 'Bass',
+                'sfx': 'SFX'
+            };
+            const module = document.getElementById('mi-module').value;
+            const model = document.getElementById('synthesis-model').value;
+            const moduleData = MI_MODULES[module];
+            const modelData = moduleData.models.find(m => m.value === model);
+            const modelName = modelData ? modelData.name.split('(')[0].trim() : 'Synth';
+            const outputName = `${moduleData.name} ${modelName} ${typeNames[soundType]}`;
+            document.getElementById('output-name').value = outputName;
+
+            showStatus('🎲 RANDOMIZED EVERYTHING! 🎲', 'success');
+        }
+
+        // Wire up all randomize buttons
+        document.getElementById('randomize-everything-btn').addEventListener('click', randomizeEverything);
+        document.getElementById('randomize-engine-btn').addEventListener('click', randomizeEngine);
+        document.getElementById('randomize-synth-btn').addEventListener('click', randomizeSynthParams);
+        document.getElementById('randomize-excitation-btn').addEventListener('click', randomizeExcitation);
+        document.getElementById('randomize-envelope-btn').addEventListener('click', randomizeEnvelope);
+        document.getElementById('randomize-lfo1-btn').addEventListener('click', () => randomizeLFO(1));
+        document.getElementById('randomize-lfo2-btn').addEventListener('click', () => randomizeLFO(2));
+        document.getElementById('randomize-lfo3-btn').addEventListener('click', () => randomizeLFO(3));
+        document.getElementById('randomize-modenv-btn').addEventListener('click', randomizeModEnv);
+        document.getElementById('randomize-modulation-btn').addEventListener('click', randomizeAllModulation);
 
         // Apply LFO modulation to a parameter value
         function applyLFO(baseValue, lfoValue, depth, destination) {
