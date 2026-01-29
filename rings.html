@@ -1,0 +1,2856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MI Multisampler for OP-XY - Plaits + Braids Synthesis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+            color: #e8e6e3;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #1e1e1e;
+            border: 3px solid #3a3a3a;
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(255, 145, 77, 0.12);
+        }
+
+        h1 {
+            color: #ff914d;
+            text-shadow: 0 0 10px rgba(255, 145, 77, 0.4);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #999;
+            margin-top: -5px;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .section {
+            background: #252525;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #3a3a3a;
+            border-radius: 5px;
+        }
+
+        .param-group {
+            margin: 15px 0;
+        }
+
+        label {
+            display: block;
+            color: #ff914d;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="number"], input[type="text"], select {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid #ff914d;
+            background: #1a1a1a;
+            color: #e8e6e3;
+            border-radius: 3px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        input[type="range"] {
+            width: 300px;
+            margin: 0 15px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .slider-label {
+            width: 150px;
+            color: #ff914d;
+        }
+
+        .slider-value {
+            width: 80px;
+            text-align: right;
+            color: #e8e6e3;
+        }
+
+        button {
+            background: linear-gradient(180deg, #ff914d 0%, #e6752f 100%);
+            color: #fff;
+            border: 2px solid #ff914d;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            margin: 10px 10px 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background: linear-gradient(180deg, #ffab6b 0%, #ff914d 100%);
+            box-shadow: 0 0 15px rgba(255, 145, 77, 0.5);
+        }
+
+        button:disabled {
+            background: #333;
+            border-color: #555;
+            color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .status {
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .status.success {
+            display: block;
+            background: #1a2e1a;
+            border: 1px solid #4caf50;
+            color: #81c784;
+        }
+
+        .status.error {
+            display: block;
+            background: #2e1a1a;
+            border: 1px solid #f44336;
+            color: #e57373;
+        }
+
+        .status.info {
+            display: block;
+            background: #2e251a;
+            border: 1px solid #ff914d;
+            color: #ffab6b;
+        }
+
+        .credit {
+            text-align: center;
+            color: #666;
+            font-size: 11px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #3a3a3a;
+        }
+
+        .credit a {
+            color: #ff914d;
+            text-decoration: none;
+        }
+
+        .credit a:hover {
+            text-decoration: underline;
+        }
+
+        .visual-keyboard {
+            margin: 20px auto;
+            height: 80px;
+            display: flex;
+            position: relative;
+            user-select: none;
+            justify-content: center;
+            background: #1a1a1a;
+            border-radius: 5px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        .visual-key {
+            border: 1px solid #000;
+            box-sizing: border-box;
+        }
+
+        .visual-key.white {
+            width: 20px;
+            height: 80px;
+            background: #e8e6e3;
+            border: 1px solid #2a2a2a;
+            z-index: 1;
+            position: relative;
+        }
+
+        .visual-key.white.in-range {
+            background: #ffab6b;
+        }
+
+        .visual-key.black {
+            width: 12px;
+            height: 50px;
+            background: #1a1a1a;
+            border: 1px solid #666;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .visual-key.black.in-range {
+            outline: 2px solid #ff914d;
+            outline-offset: -2px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MI Multisampler</h1>
+    <p class="subtitle">Mutable Instruments Plaits + Braids - 16 Synthesis Models for OP-XY</p>
+
+    <div class="section">
+        <h3>MI Module & Parameters</h3>
+
+        <div class="param-group">
+            <label for="mi-module">MI Module</label>
+            <select id="mi-module">
+                <option value="plaits">Plaits (Macro Oscillator)</option>
+                <option value="braids">Braids (Macro Oscillator)</option>
+            </select>
+        </div>
+
+        <div class="param-group">
+            <label for="synthesis-model">Synthesis Model</label>
+            <select id="synthesis-model">
+                <!-- Populated dynamically based on module selection -->
+            </select>
+        </div>
+
+        <div class="param-group">
+            <label for="sound-type">Randomize Sound Type</label>
+            <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                <select id="sound-type" style="flex: 1;">
+                    <option value="pluck">Pluck (Guitar, Bass, Pizzicato)</option>
+                    <option value="strings">Strings (Bowed, Sustained)</option>
+                    <option value="pad">Pad (Long Decay, Atmospheric)</option>
+                    <option value="lead">Lead (Bright, Articulate)</option>
+                    <option value="bass">Bass (Dark, Sustained)</option>
+                    <option value="sfx">SFX (Random, Experimental)</option>
+                </select>
+                <button id="randomize-btn" style="margin: 0;">Randomize</button>
+            </div>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Structure:</span>
+            <input type="range" id="structure" min="0" max="1" step="0.01" value="0.5">
+            <span class="slider-value" id="structure-value">0.50</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Brightness:</span>
+            <input type="range" id="brightness" min="0" max="1" step="0.01" value="0.5">
+            <span class="slider-value" id="brightness-value">0.50</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Damping:</span>
+            <input type="range" id="damping" min="0" max="1" step="0.01" value="0.5">
+            <span class="slider-value" id="damping-value">0.50</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Position:</span>
+            <input type="range" id="position" min="0" max="1" step="0.01" value="0.5">
+            <span class="slider-value" id="position-value">0.50</span>
+        </div>
+
+        <button id="preview-btn">Preview Sound</button>
+    </div>
+
+    <div class="section">
+        <h3>Modulation (LFO)</h3>
+
+        <div class="param-group">
+            <label>
+                <input type="checkbox" id="lfo-enabled" style="width: auto; margin-right: 8px;">
+                Enable LFO (adds movement to sound)
+            </label>
+        </div>
+
+        <div class="param-group">
+            <label for="lfo-destination">LFO Destination</label>
+            <select id="lfo-destination">
+                <option value="brightness">Brightness (Timbral)</option>
+                <option value="structure">Structure (Harmonic)</option>
+                <option value="position">Position (Spatial)</option>
+                <option value="damping">Damping (Decay)</option>
+                <option value="pitch">Pitch (Vibrato)</option>
+            </select>
+        </div>
+
+        <div class="param-group">
+            <label for="lfo-waveform">LFO Waveform</label>
+            <select id="lfo-waveform">
+                <option value="sine">Sine (Smooth)</option>
+                <option value="triangle">Triangle (Linear)</option>
+                <option value="square">Square (Stepped)</option>
+                <option value="random">Random (Sample & Hold)</option>
+            </select>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">LFO Rate (Hz):</span>
+            <input type="range" id="lfo-rate" min="0.1" max="20" step="0.1" value="2">
+            <span class="slider-value" id="lfo-rate-value">2.00</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">LFO Depth:</span>
+            <input type="range" id="lfo-depth" min="0" max="1" step="0.01" value="0.3">
+            <span class="slider-value" id="lfo-depth-value">0.30</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Envelope & Excitation</h3>
+
+        <div class="param-group">
+            <label for="excitation-type">Excitation Type</label>
+            <select id="excitation-type">
+                <option value="impulse">Impulse (Short Strike)</option>
+                <option value="noise">Noise Burst</option>
+                <option value="harmonic">Harmonic (Pitched)</option>
+            </select>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Excitation Intensity:</span>
+            <input type="range" id="excitation-intensity" min="0" max="1" step="0.01" value="0.5">
+            <span class="slider-value" id="excitation-intensity-value">0.50</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Attack:</span>
+            <input type="range" id="attack" min="0" max="1" step="0.01" value="0.01">
+            <span class="slider-value" id="attack-value">0.01</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Decay:</span>
+            <input type="range" id="decay" min="0" max="1" step="0.01" value="0.3">
+            <span class="slider-value" id="decay-value">0.30</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Sustain:</span>
+            <input type="range" id="sustain" min="0" max="1" step="0.01" value="0.7">
+            <span class="slider-value" id="sustain-value">0.70</span>
+        </div>
+
+        <div class="slider-container">
+            <span class="slider-label">Release:</span>
+            <input type="range" id="release" min="0" max="1" step="0.01" value="0.5">
+            <span class="slider-value" id="release-value">0.50</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Multisample Parameters</h3>
+
+        <div class="param-group">
+            <label for="output-name">Output Preset Name (OP-XY)</label>
+            <input type="text" id="output-name" value="Modal Synth" style="width: 100%; box-sizing: border-box;">
+        </div>
+
+        <div class="param-group">
+            <label>Key-On Duration (ms)</label>
+            <input type="number" id="duration" value="3000" min="500" max="10000" step="100">
+        </div>
+
+        <div class="param-group">
+            <label>MIDI Note Range</label>
+
+            <div style="display: flex; align-items: center; gap: 15px; margin: 15px 0;">
+                <span style="color: #ff914d; min-width: 40px;">Min:</span>
+                <input type="number" id="min-note" value="36" min="0" max="127" style="width: 80px;">
+                <span id="min-note-name" style="color: #e8e6e3; min-width: 50px;">(C2)</span>
+                <button id="preview-min-btn" style="margin: 0;">▶ Preview Min</button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 15px; margin: 15px 0;">
+                <span style="color: #ff914d; min-width: 40px;">Max:</span>
+                <input type="number" id="max-note" value="84" min="0" max="127" style="width: 80px;">
+                <span id="max-note-name" style="color: #e8e6e3; min-width: 50px;">(C6)</span>
+                <button id="preview-max-btn" style="margin: 0;">▶ Preview Max</button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 15px; margin: 15px 0;">
+                <span style="color: #ff914d; min-width: 40px;">Increment:</span>
+                <input type="number" id="note-increment" value="3" min="1" max="12" style="width: 80px;">
+            </div>
+        </div>
+
+        <!-- Visual keyboard showing selected range -->
+        <div id="visual-keyboard" class="visual-keyboard"></div>
+
+        <button id="download-btn">Download Multisample</button>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="credit">
+        Synthesis models inspired by <a href="https://github.com/pichenettes/eurorack" target="_blank">Mutable Instruments Plaits & Braids</a> |
+        16 MI synthesis models by Chad Furrow |
+        Export to OP-XY format
+    </div>
+
+    <script>
+        // Audio context
+        let audioContext = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // MI Module definitions - 8 models from each module
+        const MI_MODULES = {
+            plaits: {
+                name: 'Plaits',
+                models: [
+                    { value: 'plaits_pair_beater', name: 'Pair of percussive models' },
+                    { value: 'plaits_virtual_analog', name: 'Virtual analog (square, saw, triangle)' },
+                    { value: 'plaits_waveshaping', name: 'Waveshaping oscillator' },
+                    { value: 'plaits_fm', name: '2-operator FM' },
+                    { value: 'plaits_grain', name: 'Granular formant oscillator' },
+                    { value: 'plaits_additive', name: 'Harmonic oscillator (additive)' },
+                    { value: 'plaits_wavetable', name: 'Wavetable oscillator' },
+                    { value: 'plaits_chords', name: 'Chord generator' }
+                ]
+            },
+            braids: {
+                name: 'Braids',
+                models: [
+                    { value: 'braids_csaw', name: 'CSAW (triangle, sawtooth, square)' },
+                    { value: 'braids_morph', name: '/\\/\\_ (morphing saw to square)' },
+                    { value: 'braids_z_saw', name: 'Z^3 (sawtooth swarm)' },
+                    { value: 'braids_fold', name: 'FOLD (wavefolded sine/triangle)' },
+                    { value: 'braids_fm', name: 'uuuu (2-op FM)' },
+                    { value: 'braids_grain', name: 'WTBL (wavetable)' },
+                    { value: 'braids_vosim', name: 'VOSIM (vocal synthesis)' },
+                    { value: 'braids_noise', name: 'RING (ring modulator)' }
+                ]
+            }
+        };
+
+        // Update synthesis model dropdown based on selected module
+        function updateSynthesisModels() {
+            const moduleSelect = document.getElementById('mi-module');
+            const modelSelect = document.getElementById('synthesis-model');
+            const selectedModule = moduleSelect.value;
+            const module = MI_MODULES[selectedModule];
+
+            // Clear existing options
+            modelSelect.innerHTML = '';
+
+            // Populate with models for selected module
+            module.models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.value;
+                option.textContent = model.name;
+                modelSelect.appendChild(option);
+            });
+        }
+
+        // Show status message
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        // MIDI to note name conversion
+        function midiToNoteName(midiNote) {
+            const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const octave = Math.floor(midiNote / 12) - 1;
+            const noteName = noteNames[midiNote % 12];
+            return `(${noteName}${octave})`;
+        }
+
+        // Update note name displays
+        function updateNoteNames() {
+            const minNote = parseInt(document.getElementById('min-note').value);
+            const maxNote = parseInt(document.getElementById('max-note').value);
+            document.getElementById('min-note-name').textContent = midiToNoteName(minNote);
+            document.getElementById('max-note-name').textContent = midiToNoteName(maxNote);
+            updateVisualKeyboard();
+        }
+
+        // Generate visual keyboard showing selected range (piano-style layout)
+        function updateVisualKeyboard() {
+            const minNote = parseInt(document.getElementById('min-note').value);
+            const maxNote = parseInt(document.getElementById('max-note').value);
+            const keyboardEl = document.getElementById('visual-keyboard');
+            keyboardEl.innerHTML = '';
+
+            // Show 2 octaves before and after the selected range for context
+            const startNote = Math.max(0, minNote - 24);
+            const endNote = Math.min(127, maxNote + 24);
+
+            // Find the first C to start from
+            const startOctaveNote = startNote - (startNote % 12);
+
+            const whiteKeyPattern = [0, 2, 4, 5, 7, 9, 11]; // C, D, E, F, G, A, B
+            const blackKeyOffsets = [1, 3, 6, 8, 10]; // C#, D#, F#, G#, A#
+            const blackKeyPositions = [0, 1, 3, 4, 5]; // Position relative to white key (after C, D, F, G, A)
+
+            let whiteKeyIndex = 0;
+
+            // Create white keys first
+            for (let note = startOctaveNote; note <= endNote; note++) {
+                const noteInOctave = note % 12;
+                if (whiteKeyPattern.includes(noteInOctave) && note >= startNote) {
+                    const inRange = note >= minNote && note <= maxNote;
+                    const key = document.createElement('div');
+                    key.className = `visual-key white ${inRange ? 'in-range' : ''}`;
+                    key.title = `MIDI ${note} ${midiToNoteName(note)}`;
+                    key.dataset.note = note;
+                    key.dataset.whiteIndex = whiteKeyIndex;
+                    keyboardEl.appendChild(key);
+                    whiteKeyIndex++;
+                }
+            }
+
+            // Create black keys positioned absolutely
+            whiteKeyIndex = 0;
+            for (let note = startOctaveNote; note <= endNote; note++) {
+                const noteInOctave = note % 12;
+
+                // Track white key index
+                if (whiteKeyPattern.includes(noteInOctave) && note >= startNote) {
+                    whiteKeyIndex++;
+                }
+
+                // Create black key
+                if (blackKeyOffsets.includes(noteInOctave) && note >= startNote) {
+                    const inRange = note >= minNote && note <= maxNote;
+                    const key = document.createElement('div');
+                    key.className = `visual-key black ${inRange ? 'in-range' : ''}`;
+                    key.title = `MIDI ${note} ${midiToNoteName(note)}`;
+
+                    // Position between white keys
+                    const whiteKeyWidth = 20;
+                    const blackKeyWidth = 12;
+                    const leftPosition = (whiteKeyIndex - 1) * whiteKeyWidth + whiteKeyWidth - (blackKeyWidth / 2);
+                    key.style.left = `${leftPosition}px`;
+
+                    keyboardEl.appendChild(key);
+                }
+            }
+        }
+
+        // Preview a specific MIDI note
+        function previewNote(midiNote) {
+            initAudio();
+
+            const mode = document.getElementById('synthesis-model').value;
+            const structure = parseFloat(document.getElementById('structure').value);
+            const brightness = parseFloat(document.getElementById('brightness').value);
+            const damping = parseFloat(document.getElementById('damping').value);
+            const position = parseFloat(document.getElementById('position').value);
+            const attack = parseFloat(document.getElementById('attack').value);
+            const decay = parseFloat(document.getElementById('decay').value);
+            const sustain = parseFloat(document.getElementById('sustain').value);
+            const release = parseFloat(document.getElementById('release').value);
+            const excitationType = document.getElementById('excitation-type').value;
+            const excitationIntensity = parseFloat(document.getElementById('excitation-intensity').value);
+            const lfoEnabled = document.getElementById('lfo-enabled').checked;
+            const lfoDestination = document.getElementById('lfo-destination').value;
+            const lfoWaveform = document.getElementById('lfo-waveform').value;
+            const lfoRate = parseFloat(document.getElementById('lfo-rate').value);
+            const lfoDepth = parseFloat(document.getElementById('lfo-depth').value);
+
+            const duration = 2000;
+
+            const buffer = generateSample(
+                midiNote, audioContext.sampleRate, duration,
+                mode, structure, brightness, damping, position,
+                attack, decay, sustain, release,
+                excitationType, excitationIntensity,
+                lfoEnabled, lfoDestination, lfoWaveform, lfoRate, lfoDepth
+            );
+
+            const audioBuffer = audioContext.createBuffer(1, buffer.length, audioContext.sampleRate);
+            audioBuffer.copyToChannel(buffer, 0);
+
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            source.start();
+
+            showStatus(`Playing ${midiToNoteName(midiNote).replace(/[()]/g, '')} (MIDI ${midiNote})`, 'info');
+        }
+
+        // Update slider value displays
+        document.getElementById('structure').addEventListener('input', (e) => {
+            document.getElementById('structure-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('brightness').addEventListener('input', (e) => {
+            document.getElementById('brightness-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('damping').addEventListener('input', (e) => {
+            document.getElementById('damping-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('position').addEventListener('input', (e) => {
+            document.getElementById('position-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('excitation-intensity').addEventListener('input', (e) => {
+            document.getElementById('excitation-intensity-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('attack').addEventListener('input', (e) => {
+            document.getElementById('attack-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('decay').addEventListener('input', (e) => {
+            document.getElementById('decay-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('sustain').addEventListener('input', (e) => {
+            document.getElementById('sustain-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('release').addEventListener('input', (e) => {
+            document.getElementById('release-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('lfo-rate').addEventListener('input', (e) => {
+            document.getElementById('lfo-rate-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById('lfo-depth').addEventListener('input', (e) => {
+            document.getElementById('lfo-depth-value').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+
+        // Helper function to set slider value and update display
+        function setSliderValue(sliderId, value) {
+            const slider = document.getElementById(sliderId);
+            const display = document.getElementById(`${sliderId}-value`);
+            slider.value = value;
+            display.textContent = value.toFixed(2);
+        }
+
+        // Randomize parameters based on sound type
+        function randomizeParams(soundType) {
+            let structureRange, brightnessRange, dampingRange, positionRange;
+            let attackRange, decayRange, sustainRange, releaseRange, intensityRange;
+            let excitationTypes;
+
+            switch (soundType) {
+                case 'pluck':
+                    // Pluck: instant attack, bright, natural decay
+                    structureRange = [0.05, 0.35];
+                    brightnessRange = [0.55, 0.85];
+                    dampingRange = [0.35, 0.65]; // Medium decay - not too short, not too long
+                    positionRange = [0.25, 0.75];
+                    attackRange = [0.0, 0.01]; // Instant attack
+                    decayRange = [0.15, 0.45]; // Fast to medium decay
+                    sustainRange = [0.0, 0.3]; // Low sustain (pluck decays naturally)
+                    releaseRange = [0.05, 0.25]; // Short release
+                    intensityRange = [0.7, 1.0]; // Strong pluck
+                    excitationTypes = ['impulse']; // Impulse is best for plucks
+                    break;
+                case 'strings':
+                    // Strings: smooth attack, sustained, expressive
+                    structureRange = [0.2, 0.5];
+                    brightnessRange = [0.45, 0.75];
+                    dampingRange = [0.65, 0.85]; // Long sustain
+                    positionRange = [0.3, 0.7];
+                    attackRange = [0.08, 0.25]; // Bow attack
+                    decayRange = [0.3, 0.6];
+                    sustainRange = [0.7, 0.95]; // High sustain
+                    releaseRange = [0.25, 0.55]; // Medium release
+                    intensityRange = [0.5, 0.8];
+                    excitationTypes = ['harmonic', 'noise']; // Bowed sounds
+                    break;
+                case 'pad':
+                    // Pad: very slow attack, long decay, atmospheric
+                    structureRange = [0.35, 0.7];
+                    brightnessRange = [0.35, 0.65]; // Darker for warmth
+                    dampingRange = [0.8, 0.95]; // Very long decay
+                    positionRange = [0.25, 0.75];
+                    attackRange = [0.35, 0.75]; // Very slow attack
+                    decayRange = [0.6, 0.9]; // Long decay
+                    sustainRange = [0.8, 0.95]; // Very high sustain
+                    releaseRange = [0.65, 0.95]; // Very long release
+                    intensityRange = [0.35, 0.65]; // Softer
+                    excitationTypes = ['harmonic', 'noise'];
+                    break;
+                case 'lead':
+                    // Lead: bright, articulate, punchy
+                    structureRange = [0.25, 0.55];
+                    brightnessRange = [0.65, 0.9];
+                    dampingRange = [0.4, 0.65];
+                    positionRange = [0.35, 0.7];
+                    attackRange = [0.0, 0.06];
+                    decayRange = [0.2, 0.5];
+                    sustainRange = [0.55, 0.85];
+                    releaseRange = [0.15, 0.45];
+                    intensityRange = [0.6, 0.9];
+                    excitationTypes = ['impulse', 'harmonic'];
+                    break;
+                case 'bass':
+                    // Bass: dark, sustained, deep
+                    structureRange = [0.0, 0.25];
+                    brightnessRange = [0.15, 0.45]; // Darker
+                    dampingRange = [0.6, 0.85]; // Longer sustain
+                    positionRange = [0.45, 0.85];
+                    attackRange = [0.0, 0.03]; // Fast attack
+                    decayRange = [0.35, 0.65];
+                    sustainRange = [0.75, 0.95]; // High sustain
+                    releaseRange = [0.35, 0.7];
+                    intensityRange = [0.75, 1.0]; // Strong
+                    excitationTypes = ['impulse', 'harmonic'];
+                    break;
+                case 'sfx':
+                    // SFX: completely random, experimental
+                    structureRange = [0.0, 1.0];
+                    brightnessRange = [0.0, 1.0];
+                    dampingRange = [0.0, 1.0];
+                    positionRange = [0.0, 1.0];
+                    attackRange = [0.0, 1.0];
+                    decayRange = [0.0, 1.0];
+                    sustainRange = [0.0, 1.0];
+                    releaseRange = [0.0, 1.0];
+                    intensityRange = [0.0, 1.0];
+                    excitationTypes = ['impulse', 'noise', 'harmonic'];
+                    break;
+                default:
+                    structureRange = [0.0, 1.0];
+                    brightnessRange = [0.0, 1.0];
+                    dampingRange = [0.0, 1.0];
+                    positionRange = [0.0, 1.0];
+                    attackRange = [0.0, 1.0];
+                    decayRange = [0.0, 1.0];
+                    sustainRange = [0.0, 1.0];
+                    releaseRange = [0.0, 1.0];
+                    intensityRange = [0.0, 1.0];
+                    excitationTypes = ['impulse', 'noise', 'harmonic'];
+            }
+
+            // No engine-specific constraints for MI modules - all models are versatile
+
+            // Generate random values within ranges
+            const random = (min, max) => min + Math.random() * (max - min);
+
+            const structure = random(structureRange[0], structureRange[1]);
+            const brightness = random(brightnessRange[0], brightnessRange[1]);
+            const damping = random(dampingRange[0], dampingRange[1]);
+            const position = random(positionRange[0], positionRange[1]);
+            const attack = random(attackRange[0], attackRange[1]);
+            const decay = random(decayRange[0], decayRange[1]);
+            const sustain = random(sustainRange[0], sustainRange[1]);
+            const release = random(releaseRange[0], releaseRange[1]);
+            const intensity = random(intensityRange[0], intensityRange[1]);
+
+            // Random excitation type from allowed types
+            const excitationType = excitationTypes[Math.floor(Math.random() * excitationTypes.length)];
+
+            // Update sliders
+            setSliderValue('structure', structure);
+            setSliderValue('brightness', brightness);
+            setSliderValue('damping', damping);
+            setSliderValue('position', position);
+            setSliderValue('attack', attack);
+            setSliderValue('decay', decay);
+            setSliderValue('sustain', sustain);
+            setSliderValue('release', release);
+            setSliderValue('excitation-intensity', intensity);
+            document.getElementById('excitation-type').value = excitationType;
+
+            // Randomize LFO settings (50% chance to enable)
+            const enableLFO = Math.random() > 0.5;
+            document.getElementById('lfo-enabled').checked = enableLFO;
+            if (enableLFO) {
+                const lfoDestinations = ['brightness', 'structure', 'position', 'damping', 'pitch'];
+                const lfoDestination = lfoDestinations[Math.floor(Math.random() * lfoDestinations.length)];
+                document.getElementById('lfo-destination').value = lfoDestination;
+
+                const lfoWaveforms = ['sine', 'triangle', 'square', 'random'];
+                const lfoWaveform = lfoWaveforms[Math.floor(Math.random() * lfoWaveforms.length)];
+                document.getElementById('lfo-waveform').value = lfoWaveform;
+
+                const lfoRate = 0.5 + Math.random() * 8; // 0.5-8.5 Hz
+                setSliderValue('lfo-rate', lfoRate);
+
+                const lfoDepth = 0.1 + Math.random() * 0.4; // 0.1-0.5 depth
+                setSliderValue('lfo-depth', lfoDepth);
+            }
+
+            showStatus(`Randomized ${soundType} parameters!`, 'success');
+        }
+
+        // Randomize button event listener
+        document.getElementById('randomize-btn').addEventListener('click', () => {
+            const soundType = document.getElementById('sound-type').value;
+            const module = document.getElementById('mi-module').value;
+            const model = document.getElementById('synthesis-model').value;
+            randomizeParams(soundType);
+
+            // Update output name based on sound type and model
+            const typeNames = {
+                'pluck': 'Pluck',
+                'strings': 'Strings',
+                'pad': 'Pad',
+                'lead': 'Lead',
+                'bass': 'Bass',
+                'sfx': 'SFX'
+            };
+
+            // Get model name from MI_MODULES
+            const moduleData = MI_MODULES[module];
+            const modelData = moduleData.models.find(m => m.value === model);
+            const modelName = modelData ? modelData.name.split('(')[0].trim() : 'Synth';
+
+            const outputName = `${moduleData.name} ${modelName} ${typeNames[soundType]}`;
+            document.getElementById('output-name').value = outputName;
+        });
+
+        // Apply LFO modulation to a parameter value
+        function applyLFO(baseValue, lfoValue, depth, destination) {
+            if (destination === 'pitch') {
+                // Pitch modulation in semitones (±depth semitones)
+                return baseValue * Math.pow(2, (lfoValue * depth * 2) / 12);
+            } else {
+                // Standard parameter modulation (clamped to 0-1)
+                return Math.max(0, Math.min(1, baseValue + lfoValue * depth));
+            }
+        }
+
+        // Generate LFO signal
+        function generateLFO(numSamples, sampleRate, rate, waveform) {
+            const lfo = new Float32Array(numSamples);
+            const period = sampleRate / rate;
+
+            for (let i = 0; i < numSamples; i++) {
+                const phase = (i % period) / period;
+
+                switch (waveform) {
+                    case 'sine':
+                        lfo[i] = Math.sin(2 * Math.PI * phase);
+                        break;
+                    case 'triangle':
+                        lfo[i] = phase < 0.5 ? (4 * phase - 1) : (3 - 4 * phase);
+                        break;
+                    case 'square':
+                        lfo[i] = phase < 0.5 ? 1 : -1;
+                        break;
+                    case 'random':
+                        // Sample & Hold - update value at each cycle
+                        if (i === 0 || (i % Math.floor(period)) === 0) {
+                            lfo[i] = Math.random() * 2 - 1;
+                        } else {
+                            lfo[i] = lfo[i - 1];
+                        }
+                        break;
+                    default:
+                        lfo[i] = Math.sin(2 * Math.PI * phase);
+                }
+            }
+
+            return lfo;
+        }
+
+        // Generate ADSR envelope
+        function generateEnvelope(numSamples, sampleRate, attack, decay, sustain, release, durationMs) {
+            const envelope = new Float32Array(numSamples);
+
+            // Convert normalized values to sample counts
+            const attackSamples = Math.floor(attack * sampleRate * 2.0); // Up to 2s attack for pads
+            const decaySamples = Math.floor(decay * sampleRate * 2.0); // Up to 2s decay
+            const releaseSamples = Math.floor(release * sampleRate * 3.0); // Up to 3s release
+
+            // Note on duration (exclude release)
+            const noteOnDuration = durationMs / 1000 * sampleRate;
+            const sustainSamples = Math.max(0, noteOnDuration - attackSamples - decaySamples);
+            const releaseStart = attackSamples + decaySamples + sustainSamples;
+
+            for (let i = 0; i < numSamples; i++) {
+                if (i < attackSamples) {
+                    // Attack phase: 0 to 1
+                    envelope[i] = i / attackSamples;
+                } else if (i < attackSamples + decaySamples) {
+                    // Decay phase: 1 to sustain level
+                    const decayProgress = (i - attackSamples) / decaySamples;
+                    envelope[i] = 1.0 - (1.0 - sustain) * decayProgress;
+                } else if (i < releaseStart) {
+                    // Sustain phase: constant sustain level
+                    envelope[i] = sustain;
+                } else if (i < releaseStart + releaseSamples) {
+                    // Release phase: sustain to 0
+                    const releaseProgress = (i - releaseStart) / releaseSamples;
+                    envelope[i] = sustain * (1.0 - releaseProgress);
+                } else {
+                    // Silence after release
+                    envelope[i] = 0;
+                }
+            }
+
+            return envelope;
+        }
+
+        // Generate excitation signal
+        function generateExcitation(numSamples, sampleRate, type, intensity, frequency, position) {
+            const excitation = new Float32Array(numSamples);
+            const excitationLength = Math.floor(sampleRate * 0.02 * (0.5 + position * 0.5)); // 10-30ms based on position
+
+            switch (type) {
+                case 'impulse':
+                    // Short impulse (like a pluck or strike)
+                    for (let i = 0; i < Math.min(excitationLength, numSamples); i++) {
+                        const decay = Math.exp(-i / (sampleRate * 0.005));
+                        excitation[i] = (Math.random() * 2 - 1) * intensity * decay;
+                    }
+                    break;
+
+                case 'noise':
+                    // Noise burst (longer, more diffuse)
+                    for (let i = 0; i < Math.min(excitationLength, numSamples); i++) {
+                        excitation[i] = (Math.random() * 2 - 1) * intensity * 0.7;
+                    }
+                    break;
+
+                case 'harmonic':
+                    // Harmonic excitation (pitched sine wave)
+                    for (let i = 0; i < Math.min(excitationLength, numSamples); i++) {
+                        const t = i / sampleRate;
+                        const decay = Math.exp(-i / (sampleRate * 0.01));
+                        excitation[i] = Math.sin(2 * Math.PI * frequency * t) * intensity * decay;
+                    }
+                    break;
+            }
+
+            return excitation;
+        }
+
+        // Modal synthesis engine - simplified implementation
+        function generateModalSample(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Modal synthesis: create multiple resonant modes (harmonics)
+            const numModes = 8;
+
+            // Generate samples by summing all modes
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+                let value = 0;
+
+                // Apply LFO modulation to parameters
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modPosition = position;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure':
+                            modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure');
+                            break;
+                        case 'brightness':
+                            modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness');
+                            break;
+                        case 'damping':
+                            modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping');
+                            break;
+                        case 'position':
+                            modPosition = applyLFO(position, lfoValue, lfoDepth, 'position');
+                            break;
+                        case 'pitch':
+                            modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch');
+                            break;
+                    }
+                }
+
+                // Add excitation at the beginning
+                if (sample < excitationSignal.length) {
+                    value += excitationSignal[sample];
+                }
+
+                // Generate all modes for this sample
+                for (let i = 0; i < numModes; i++) {
+                    const modeIndex = i + 1;
+                    const harmonicRatio = modeIndex * (1 + modStructure * modeIndex * 0.1);
+                    const modeFreq = modFrequency * harmonicRatio;
+
+                    const brightnessDecay = Math.pow(0.5, i * (1 - modBrightness));
+                    const positionEffect = 1 - Math.abs(Math.sin(Math.PI * modeIndex * modPosition));
+                    const amplitude = 0.3 * brightnessDecay * positionEffect;
+
+                    // Increased damping sensitivity: 0.05s to 8s decay
+                    const decayTime = 0.05 + modDamping * 7.95;
+                    const decayRate = 1 / (decayTime * sampleRate);
+                    const modeDecay = Math.exp(-decayRate * sample);
+
+                    const phase = Math.random() * 0.001; // Small random phase
+                    value += amplitude * modeDecay * Math.sin(2 * Math.PI * modeFreq * t + phase);
+                }
+
+                // Apply ADSR envelope
+                buffer[sample] = value * adsrEnvelope[sample];
+            }
+
+            // Normalize to prevent clipping
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                const normFactor = 0.8 / maxAmp;
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= normFactor;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Resonant synthesis - bandpass filters at harmonic frequencies
+        function generateResonantSample(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Number of resonant peaks (formants)
+            const numResonators = Math.floor(3 + structure * 5); // 3-8 resonators
+
+            // Generate resonators at harmonic frequencies
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+                let value = 0;
+
+                // Apply LFO modulation to parameters
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modPosition = position;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure':
+                            modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure');
+                            break;
+                        case 'brightness':
+                            modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness');
+                            break;
+                        case 'damping':
+                            modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping');
+                            break;
+                        case 'position':
+                            modPosition = applyLFO(position, lfoValue, lfoDepth, 'position');
+                            break;
+                        case 'pitch':
+                            modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch');
+                            break;
+                    }
+                }
+
+                // Add excitation at the beginning
+                if (sample < excitationSignal.length) {
+                    value += excitationSignal[sample] * 0.5;
+                }
+
+                // Generate resonant modes
+                for (let i = 0; i < numResonators; i++) {
+                    const resonatorIndex = i + 1;
+
+                    // Structure affects harmonic spacing (1.0 = harmonic, higher = inharmonic)
+                    const harmonicRatio = resonatorIndex * (1 + modStructure * 0.3);
+                    const resonantFreq = modFrequency * harmonicRatio;
+
+                    // Brightness controls amplitude rolloff of higher resonators
+                    const brightnessDecay = Math.pow(0.6, i * (1 - modBrightness));
+
+                    // Position controls formant-like shifts
+                    const positionShift = Math.sin(Math.PI * resonatorIndex * modPosition);
+                    const amplitude = 0.4 * brightnessDecay * (0.7 + 0.3 * positionShift);
+
+                    // Damping controls decay time (0.1s to 6s)
+                    const decayTime = 0.1 + modDamping * 5.9;
+                    const decayRate = 1 / (decayTime * sampleRate);
+                    const resonatorDecay = Math.exp(-decayRate * sample * (1 + i * 0.2));
+
+                    // Bandwidth increases with resonator number (Q factor)
+                    const bandwidth = resonantFreq * (0.05 + i * 0.02);
+                    const bandwidthPhase = Math.sin(2 * Math.PI * bandwidth * t) * 0.1;
+
+                    value += amplitude * resonatorDecay * Math.sin(2 * Math.PI * resonantFreq * t + bandwidthPhase);
+                }
+
+                // Apply ADSR envelope
+                buffer[sample] = value * adsrEnvelope[sample];
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                const normFactor = 0.8 / maxAmp;
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= normFactor;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Sympathetic strings - proper comb filter implementation
+        function generateSympatheticSample(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Number of sympathetic strings
+            const numStrings = 5;
+
+            // Create delay lines for each string
+            const delays = [];
+            const delayBuffers = [];
+
+            for (let s = 0; s < numStrings; s++) {
+                // Structure controls detuning spread (0 = unison, 1 = wide spread)
+                const detuneRatio = 1 + structure * (s - 2) * 0.12; // ±24% max spread
+                const stringFreq = baseFrequency * detuneRatio;
+                const delayLength = Math.floor(sampleRate / stringFreq);
+
+                delays.push(delayLength);
+                delayBuffers.push(new Float32Array(delayLength));
+
+                // Seed each delay line with the excitation signal
+                for (let i = 0; i < Math.min(excitationSignal.length, delayLength); i++) {
+                    delayBuffers[s][i] = excitationSignal[i];
+                }
+            }
+
+            // Process audio
+            for (let sample = 0; sample < numSamples; sample++) {
+                let sum = 0;
+
+                // Apply LFO modulation
+                let modBrightness = brightness;
+                let modDamping = damping;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'brightness':
+                            modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness');
+                            break;
+                        case 'damping':
+                            modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping');
+                            break;
+                    }
+                }
+
+                // Sum all string outputs
+                for (let s = 0; s < numStrings; s++) {
+                    const delayLength = delays[s];
+                    const delayBuffer = delayBuffers[s];
+                    const readPos = sample % delayLength;
+                    const readPosNext = (sample + 1) % delayLength;
+
+                    // Read from delay line
+                    const current = delayBuffer[readPos];
+                    const next = delayBuffer[readPosNext];
+
+                    // Averaging filter (smoothing) - Brightness controls filter cutoff
+                    const brightnessFactor = 0.3 + modBrightness * 0.7;
+                    const filtered = current * brightnessFactor + next * (1 - brightnessFactor);
+
+                    // Damping controls feedback (0.65-0.95 for musical sustain)
+                    const feedback = 0.65 + modDamping * 0.3;
+
+                    // Add slight position-based phase offset for shimmer
+                    const phaseOffset = position * s * 0.02;
+                    const finalSample = filtered * feedback * (1 - phaseOffset);
+
+                    // Write back to delay line
+                    delayBuffer[readPos] = finalSample;
+
+                    // Accumulate output (each string contributes equally)
+                    sum += finalSample / numStrings;
+                }
+
+                // Apply ADSR envelope
+                buffer[sample] = sum * adsrEnvelope[sample] * 0.8;
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                const normFactor = 0.8 / maxAmp;
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= normFactor;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Karplus-Strong synthesis
+        function generateKarplusSample(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            const delayLength = Math.floor(sampleRate / frequency);
+
+            // Initial excitation from excitationSignal
+            for (let i = 0; i < Math.min(excitationSignal.length, numSamples); i++) {
+                buffer[i] = excitationSignal[i];
+            }
+
+            // Karplus-Strong algorithm with modifications
+            for (let sample = delayLength; sample < numSamples; sample++) {
+                // Get delayed sample
+                const delayed = buffer[sample - delayLength];
+
+                // Low-pass filter (brightness control) - more sensitive
+                let filtered;
+                if (sample > delayLength + 1) {
+                    const prev = buffer[sample - delayLength - 1];
+                    // Brightness curve for better control (0.3 to 1.0 range)
+                    const brightnessFactor = 0.3 + brightness * 0.7;
+                    filtered = delayed * brightnessFactor + prev * (1 - brightnessFactor);
+                } else {
+                    filtered = delayed;
+                }
+
+                // Structure affects inharmonicity (all-pass filter simulation)
+                const inharmonic = filtered + structure * (Math.random() * 0.1 - 0.05);
+
+                // Damping affects feedback - increased sensitivity
+                const feedback = 0.995 - (1 - damping) * 0.45;
+
+                buffer[sample] = inharmonic * feedback;
+            }
+
+            // Apply ADSR envelope
+            for (let i = 0; i < numSamples; i++) {
+                buffer[i] *= adsrEnvelope[i];
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                const normFactor = 0.8 / maxAmp;
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= normFactor;
+                }
+            }
+
+            return buffer;
+        }
+
+        // 2-Operator FM synthesis
+        function generateFmSample(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                // Apply LFO modulation
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modPosition = position;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure':
+                            modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure');
+                            break;
+                        case 'brightness':
+                            modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness');
+                            break;
+                        case 'damping':
+                            modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping');
+                            break;
+                        case 'position':
+                            modPosition = applyLFO(position, lfoValue, lfoDepth, 'position');
+                            break;
+                        case 'pitch':
+                            modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch');
+                            break;
+                    }
+                }
+
+                const modIndex = modStructure * 20;
+                const ratio = 0.5 + modPosition * 7.5;
+                const modFreq = modFrequency * ratio;
+                const brightnessScale = 0.5 + modBrightness * 0.5;
+                const indexDecayRate = (1 - modDamping) * 0.0001;
+                const currentModIndex = modIndex * brightnessScale * Math.exp(-indexDecayRate * sample);
+
+                const modulator = Math.sin(2 * Math.PI * modFreq * t);
+                const carrier = Math.sin(2 * Math.PI * modFrequency * t + currentModIndex * modulator);
+
+                buffer[sample] = carrier * 0.5 * adsrEnvelope[sample];
+            }
+
+            return buffer;
+        }
+
+        // Additive synthesis
+        function generateAdditiveSample(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            const numHarmonics = 16;
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+                let value = 0;
+
+                // Apply LFO modulation
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modPosition = position;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure':
+                            modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure');
+                            break;
+                        case 'brightness':
+                            modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness');
+                            break;
+                        case 'damping':
+                            modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping');
+                            break;
+                        case 'position':
+                            modPosition = applyLFO(position, lfoValue, lfoDepth, 'position');
+                            break;
+                        case 'pitch':
+                            modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch');
+                            break;
+                    }
+                }
+
+                for (let h = 1; h <= numHarmonics; h++) {
+                    const isOdd = h % 2 === 1;
+                    const harmonicWeight = isOdd ? 1.0 : modStructure;
+                    const brightnessRolloff = Math.pow(0.5, (h - 1) * (1 - modBrightness));
+                    const phaseOffset = modPosition * h * Math.PI;
+                    const decayRate = (1 - modDamping) * 0.0001 * h;
+                    const envelope = Math.exp(-decayRate * sample);
+                    const amplitude = (1 / h) * brightnessRolloff * harmonicWeight;
+                    value += amplitude * envelope * Math.sin(2 * Math.PI * modFrequency * h * t + phaseOffset);
+                }
+
+                buffer[sample] = value * 0.3 * adsrEnvelope[sample];
+            }
+
+            return buffer;
+        }
+
+        // Filtered noise
+        function generateNoiseSample(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Generate white noise
+            for (let i = 0; i < numSamples; i++) {
+                buffer[i] = (Math.random() * 2 - 1);
+            }
+
+            // Structure: number of bandpass filters (1-5)
+            const numFilters = Math.floor(1 + structure * 4);
+
+            // Apply multiple bandpass filters
+            for (let f = 0; f < numFilters; f++) {
+                // Position affects formant spacing
+                const formantRatio = 1 + f * (1 + position * 2);
+                const centerFreq = frequency * formantRatio;
+
+                // Brightness: bandwidth of filters
+                const bandwidth = centerFreq * (0.1 + brightness * 0.4);
+                const q = centerFreq / bandwidth;
+
+                // Simple resonant filter
+                const omega = 2 * Math.PI * centerFreq / sampleRate;
+                const alpha = Math.sin(omega) / (2 * q);
+                const cosOmega = Math.cos(omega);
+
+                const b0 = alpha;
+                const b1 = 0;
+                const b2 = -alpha;
+                const a0 = 1 + alpha;
+                const a1 = -2 * cosOmega;
+                const a2 = 1 - alpha;
+
+                let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+
+                for (let i = 0; i < numSamples; i++) {
+                    const x = buffer[i];
+                    const y = (b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2) / a0;
+
+                    x2 = x1;
+                    x1 = x;
+                    y2 = y1;
+                    y1 = y;
+
+                    buffer[i] = y;
+                }
+            }
+
+            // Apply ADSR and damping
+            for (let i = 0; i < numSamples; i++) {
+                const decay = Math.exp(-(1 - damping) * 0.001 * i);
+                buffer[i] *= adsrEnvelope[i] * decay;
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                const normFactor = 0.6 / maxAmp;
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= normFactor;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Waveguide (blown pipe)
+        function generateWaveguideSample(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            const delayLength = Math.floor(sampleRate / frequency);
+
+            // Structure: breath noise amount (0=pure tone, 1=breathy)
+            const breathAmount = structure;
+
+            // Initial excitation: mix of noise and harmonic
+            for (let i = 0; i < Math.min(delayLength * 2, numSamples); i++) {
+                const noise = (Math.random() * 2 - 1) * breathAmount;
+                const tone = Math.sin(2 * Math.PI * frequency * i / sampleRate) * (1 - breathAmount);
+                buffer[i] = (noise + tone) * 0.5;
+            }
+
+            // Waveguide with reflection and loss
+            for (let sample = delayLength; sample < numSamples; sample++) {
+                // Get delayed sample
+                const delayed = buffer[sample - delayLength];
+
+                // Brightness: low-pass filter
+                let filtered;
+                if (sample > delayLength + 1) {
+                    const prev = buffer[sample - delayLength - 1];
+                    filtered = delayed * brightness + prev * (1 - brightness);
+                } else {
+                    filtered = delayed;
+                }
+
+                // Position: embouchure/bore shape (affects tone)
+                const embouchure = 0.5 + position * 0.4;
+
+                // Add continuous breath noise
+                const breathNoise = (Math.random() * 2 - 1) * breathAmount * 0.1;
+
+                // Damping: reflection coefficient
+                const reflection = 0.95 + damping * 0.04;
+
+                buffer[sample] = filtered * reflection * embouchure + breathNoise;
+            }
+
+            // Apply ADSR envelope
+            for (let i = 0; i < numSamples; i++) {
+                buffer[i] *= adsrEnvelope[i];
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                const normFactor = 0.7 / maxAmp;
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= normFactor;
+                }
+            }
+
+            return buffer;
+        }
+
+        // ===== PLAITS SYNTHESIS ENGINES =====
+
+        // Plaits: Pair of percussive models (kick/snare-like)
+        function generatePlaitsPairBeater(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                // Apply LFO modulation
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Structure morphs between kick (0) and snare (1)
+                const kickAmount = 1 - modStructure;
+                const snareAmount = modStructure;
+
+                // Kick: pitch envelope + sine
+                const pitchEnv = Math.exp(-t * (15 + modBrightness * 30));
+                const kickFreq = modFrequency * 0.5 * (1 + pitchEnv * 3);
+                const kickDecay = Math.exp(-t * (3 + (1 - modDamping) * 7));
+                const kick = Math.sin(2 * Math.PI * kickFreq * t) * kickDecay;
+
+                // Snare: filtered noise
+                const snareDecay = Math.exp(-t * (8 + (1 - modDamping) * 12));
+                const noise = (Math.random() * 2 - 1) * snareDecay;
+
+                // Mix
+                const value = kick * kickAmount + noise * snareAmount * 0.8;
+                buffer[sample] = value * adsrEnvelope[sample];
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= 0.8 / maxAmp;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Plaits: Virtual analog (saw, square, triangle)
+        function generatePlaitsVirtualAnalog(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                const phase = (modFrequency * t) % 1;
+
+                // Structure morphs: saw (0-0.33), square (0.33-0.66), triangle (0.66-1)
+                let waveform;
+                if (modStructure < 0.33) {
+                    // Sawtooth
+                    waveform = 2 * phase - 1;
+                } else if (modStructure < 0.66) {
+                    // Square with PWM
+                    const pulseWidth = 0.5 + (modStructure - 0.33) * 0.5;
+                    waveform = phase < pulseWidth ? 1 : -1;
+                } else {
+                    // Triangle
+                    waveform = phase < 0.5 ? (4 * phase - 1) : (3 - 4 * phase);
+                }
+
+                // Low-pass filter (brightness)
+                const numHarmonics = Math.floor(2 + modBrightness * 18);
+                let filtered = 0;
+                for (let h = 1; h <= numHarmonics; h++) {
+                    const harmAmp = 1 / h;
+                    filtered += harmAmp * Math.sin(2 * Math.PI * modFrequency * h * t);
+                }
+                filtered *= waveform * 0.3;
+
+                // Damping affects amplitude envelope
+                const decay = Math.exp(-(1 - modDamping) * 0.001 * sample);
+
+                buffer[sample] = filtered * decay * adsrEnvelope[sample] * 0.5;
+            }
+
+            return buffer;
+        }
+
+        // Plaits: Waveshaping oscillator
+        function generatePlaitsWaveshaping(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Start with sine
+                let wave = Math.sin(2 * Math.PI * modFrequency * t);
+
+                // Waveshaping amount (structure)
+                const foldAmount = modStructure * 5;
+                wave = Math.sin(wave * (1 + foldAmount));
+
+                // Brightness adds harmonics
+                for (let h = 2; h <= 5; h++) {
+                    const harmAmp = (1 / h) * Math.pow(modBrightness, h - 1);
+                    wave += harmAmp * Math.sin(2 * Math.PI * modFrequency * h * t + wave * foldAmount);
+                }
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0008 * sample);
+
+                buffer[sample] = wave * decay * adsrEnvelope[sample] * 0.3;
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= 0.7 / maxAmp;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Plaits: 2-operator FM (using existing FM engine with Plaits character)
+        function generatePlaitsFM(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // FM with integer ratios for more harmonic results
+                const ratio = Math.floor(1 + modStructure * 7); // 1-8
+                const modIndex = modBrightness * 10;
+                const modFreq = modFrequency * ratio;
+
+                const indexDecayRate = (1 - modDamping) * 0.0001;
+                const currentModIndex = modIndex * Math.exp(-indexDecayRate * sample);
+
+                const modulator = Math.sin(2 * Math.PI * modFreq * t);
+                const carrier = Math.sin(2 * Math.PI * modFrequency * t + currentModIndex * modulator);
+
+                buffer[sample] = carrier * 0.4 * adsrEnvelope[sample];
+            }
+
+            return buffer;
+        }
+
+        // Plaits: Granular formant oscillator
+        function generatePlaitsGrain(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Grain size (structure)
+                const grainSize = 0.005 + modStructure * 0.045; // 5-50ms
+                const grainRate = 20 + modStructure * 80; // 20-100 Hz
+
+                // Formant frequencies (brightness)
+                const formant1 = modFrequency * (1 + modBrightness * 3);
+                const formant2 = modFrequency * (2 + modBrightness * 5);
+
+                // Grain envelope
+                const grainPhase = (t * grainRate) % 1;
+                const grainEnv = grainPhase < grainSize * grainRate ?
+                    Math.sin(Math.PI * grainPhase / (grainSize * grainRate)) : 0;
+
+                // Formant oscillators
+                const osc1 = Math.sin(2 * Math.PI * formant1 * t);
+                const osc2 = Math.sin(2 * Math.PI * formant2 * t) * 0.5;
+
+                const grain = (osc1 + osc2) * grainEnv;
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0005 * sample);
+
+                buffer[sample] = grain * decay * adsrEnvelope[sample] * 0.5;
+            }
+
+            return buffer;
+        }
+
+        // Plaits: Harmonic oscillator (additive)
+        function generatePlaitsAdditive(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            const numHarmonics = 16;
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+                let value = 0;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Structure: harmonic distribution (organ-like vs string-like)
+                for (let h = 1; h <= numHarmonics; h++) {
+                    // Drawbar-like control
+                    let amplitude;
+                    if (modStructure < 0.5) {
+                        // Organ-like: strong fundamental and octaves
+                        amplitude = (h === 1 || h === 2 || h === 4 || h === 8) ? 1.0 / h : 0.3 / h;
+                    } else {
+                        // String-like: rich harmonics
+                        amplitude = 1.0 / h;
+                    }
+
+                    // Brightness rolloff
+                    const brightnessRolloff = Math.pow(0.6, (h - 1) * (1 - modBrightness));
+
+                    // Damping: individual harmonic decay
+                    const decayRate = (1 - modDamping) * 0.0001 * h;
+                    const envelope = Math.exp(-decayRate * sample);
+
+                    value += amplitude * brightnessRolloff * envelope * Math.sin(2 * Math.PI * modFrequency * h * t);
+                }
+
+                buffer[sample] = value * 0.25 * adsrEnvelope[sample];
+            }
+
+            return buffer;
+        }
+
+        // Plaits: Wavetable oscillator
+        function generatePlaitsWavetable(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Simple wavetable: 4 waveforms
+            const wavetable = [
+                (phase) => Math.sin(2 * Math.PI * phase), // Sine
+                (phase) => 2 * phase - 1, // Saw
+                (phase) => phase < 0.5 ? 1 : -1, // Square
+                (phase) => phase < 0.5 ? (4 * phase - 1) : (3 - 4 * phase) // Triangle
+            ];
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                const phase = (modFrequency * t) % 1;
+
+                // Structure selects and morphs between wavetable positions
+                const tablePos = modStructure * (wavetable.length - 1);
+                const tableIndex = Math.floor(tablePos);
+                const tableFrac = tablePos - tableIndex;
+
+                const wave1 = wavetable[tableIndex](phase);
+                const wave2 = tableIndex < wavetable.length - 1 ? wavetable[tableIndex + 1](phase) : wave1;
+                let wave = wave1 * (1 - tableFrac) + wave2 * tableFrac;
+
+                // Brightness: simple low-pass
+                const numHarmonics = Math.floor(2 + modBrightness * 18);
+                let filtered = 0;
+                for (let h = 1; h <= numHarmonics; h++) {
+                    filtered += (1 / h) * Math.sin(2 * Math.PI * modFrequency * h * t);
+                }
+                wave *= Math.min(1, filtered * 0.3 + 0.7);
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0008 * sample);
+
+                buffer[sample] = wave * decay * adsrEnvelope[sample] * 0.4;
+            }
+
+            return buffer;
+        }
+
+        // Plaits: Chord generator
+        function generatePlaitsChords(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Chord types (structure parameter)
+            const chordTypes = [
+                [0, 4, 7],        // Major
+                [0, 3, 7],        // Minor
+                [0, 4, 7, 11],    // Major 7
+                [0, 3, 7, 10]     // Minor 7
+            ];
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Select chord type
+                const chordIndex = Math.floor(modStructure * (chordTypes.length - 0.01));
+                const chord = chordTypes[chordIndex];
+
+                let value = 0;
+
+                // Generate chord tones
+                for (let i = 0; i < chord.length; i++) {
+                    const semitones = chord[i];
+                    const noteFreq = modFrequency * Math.pow(2, semitones / 12);
+
+                    // Add harmonics based on brightness
+                    const numHarmonics = Math.floor(1 + modBrightness * 4);
+                    for (let h = 1; h <= numHarmonics; h++) {
+                        const harmAmp = 1 / (h * chord.length);
+                        const brightnessRolloff = Math.pow(0.7, (h - 1) * (1 - modBrightness));
+                        value += harmAmp * brightnessRolloff * Math.sin(2 * Math.PI * noteFreq * h * t);
+                    }
+                }
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0006 * sample);
+
+                buffer[sample] = value * decay * adsrEnvelope[sample] * 0.3;
+            }
+
+            return buffer;
+        }
+
+        // ===== BRAIDS SYNTHESIS ENGINES =====
+
+        // Braids: CSAW (saw/square/triangle morph)
+        function generateBraidsCSAW(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                const phase = (modFrequency * t) % 1;
+
+                // Sawtooth
+                const saw = 2 * phase - 1;
+
+                // Square
+                const square = phase < 0.5 ? 1 : -1;
+
+                // Triangle
+                const tri = phase < 0.5 ? (4 * phase - 1) : (3 - 4 * phase);
+
+                // Morph between waveforms based on structure
+                let wave;
+                if (modStructure < 0.5) {
+                    // Morph saw to square
+                    const mix = modStructure * 2;
+                    wave = saw * (1 - mix) + square * mix;
+                } else {
+                    // Morph square to triangle
+                    const mix = (modStructure - 0.5) * 2;
+                    wave = square * (1 - mix) + tri * mix;
+                }
+
+                // Brightness: low-pass via harmonic content
+                const numHarmonics = Math.floor(2 + modBrightness * 18);
+                let filtered = 0;
+                for (let h = 1; h <= numHarmonics; h++) {
+                    filtered += (1 / h) * Math.sin(2 * Math.PI * modFrequency * h * t);
+                }
+                wave *= Math.min(1, filtered * 0.4 + 0.6);
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0008 * sample);
+
+                buffer[sample] = wave * decay * adsrEnvelope[sample] * 0.4;
+            }
+
+            return buffer;
+        }
+
+        // Braids: /\/\_ (morphing saw to square)
+        function generateBraidsMorph(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                const phase = (modFrequency * t) % 1;
+
+                // Pulse width modulation based on structure
+                const pulseWidth = 0.1 + modStructure * 0.8;
+
+                // Generate pulse wave
+                const pulse = phase < pulseWidth ? 1 : -1;
+
+                // Add detuned oscillators for thickness
+                const detune1 = Math.pow(2, 0.01 / 12); // +1 cent
+                const detune2 = Math.pow(2, -0.01 / 12); // -1 cent
+
+                const phase1 = (modFrequency * detune1 * t) % 1;
+                const phase2 = (modFrequency * detune2 * t) % 1;
+
+                const pulse1 = phase1 < pulseWidth ? 1 : -1;
+                const pulse2 = phase2 < pulseWidth ? 1 : -1;
+
+                let wave = (pulse + pulse1 + pulse2) / 3;
+
+                // Brightness filtering
+                const numHarmonics = Math.floor(2 + modBrightness * 15);
+                let filtered = 0;
+                for (let h = 1; h <= numHarmonics; h++) {
+                    filtered += (1 / h) * Math.sin(2 * Math.PI * modFrequency * h * t);
+                }
+                wave *= Math.min(1, filtered * 0.4 + 0.6);
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0008 * sample);
+
+                buffer[sample] = wave * decay * adsrEnvelope[sample] * 0.4;
+            }
+
+            return buffer;
+        }
+
+        // Braids: Z^3 (sawtooth swarm - 7 detuned saws)
+        function generateBraidsZSaw(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            const numOscillators = 7;
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                let wave = 0;
+
+                // Detune spread controlled by structure
+                const detuneSpread = modStructure * 0.2; // 0-20 cents
+
+                for (let osc = 0; osc < numOscillators; osc++) {
+                    // Spread oscillators around center frequency
+                    const detuneCents = ((osc - 3) / 3) * detuneSpread;
+                    const detuneRatio = Math.pow(2, detuneCents / 12);
+                    const oscFreq = modFrequency * detuneRatio;
+
+                    const phase = (oscFreq * t) % 1;
+                    const saw = 2 * phase - 1;
+
+                    wave += saw / numOscillators;
+                }
+
+                // Brightness filtering
+                const numHarmonics = Math.floor(2 + modBrightness * 18);
+                let filtered = 0;
+                for (let h = 1; h <= numHarmonics; h++) {
+                    filtered += (1 / h) * Math.sin(2 * Math.PI * modFrequency * h * t);
+                }
+                wave *= Math.min(1, filtered * 0.4 + 0.6);
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0008 * sample);
+
+                buffer[sample] = wave * decay * adsrEnvelope[sample] * 0.5;
+            }
+
+            return buffer;
+        }
+
+        // Braids: FOLD (wavefolded sine/triangle)
+        function generateBraidsFold(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Base waveform (sine or triangle based on structure)
+                const phase = (modFrequency * t) % 1;
+                let wave;
+                if (modStructure < 0.5) {
+                    wave = Math.sin(2 * Math.PI * phase);
+                } else {
+                    wave = phase < 0.5 ? (4 * phase - 1) : (3 - 4 * phase);
+                }
+
+                // Wavefolding (brightness controls fold amount)
+                const foldAmount = modBrightness * 4;
+                wave *= (1 + foldAmount);
+
+                // Wavefold
+                while (Math.abs(wave) > 1) {
+                    if (wave > 1) {
+                        wave = 2 - wave;
+                    } else if (wave < -1) {
+                        wave = -2 - wave;
+                    }
+                }
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0008 * sample);
+
+                buffer[sample] = wave * decay * adsrEnvelope[sample] * 0.5;
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= 0.7 / maxAmp;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Braids: uuuu (2-op FM)
+        function generateBraidsFM(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // FM ratio (structure: 1-4)
+                const ratio = 1 + modStructure * 3;
+                const modFreq = modFrequency * ratio;
+
+                // Modulation index (brightness)
+                const modIndex = modBrightness * 12;
+
+                // Decay modulation index
+                const indexDecayRate = (1 - modDamping) * 0.0002;
+                const currentModIndex = modIndex * Math.exp(-indexDecayRate * sample);
+
+                const modulator = Math.sin(2 * Math.PI * modFreq * t);
+                const carrier = Math.sin(2 * Math.PI * modFrequency * t + currentModIndex * modulator);
+
+                buffer[sample] = carrier * 0.5 * adsrEnvelope[sample];
+            }
+
+            return buffer;
+        }
+
+        // Braids: WTBL (wavetable)
+        function generateBraidsGrain(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            // Simple wavetables
+            const wavetables = [
+                (p) => Math.sin(2 * Math.PI * p), // Sine
+                (p) => 2 * p - 1, // Saw
+                (p) => Math.sin(2 * Math.PI * p * 2), // 2x harmonic
+                (p) => Math.sin(2 * Math.PI * p) + 0.5 * Math.sin(4 * Math.PI * p), // Mixed
+                (p) => p < 0.5 ? 1 : -1 // Square
+            ];
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                const phase = (modFrequency * t) % 1;
+
+                // Select wavetable position
+                const tablePos = modStructure * (wavetables.length - 1);
+                const tableIndex = Math.floor(tablePos);
+                const tableFrac = tablePos - tableIndex;
+
+                // Interpolate between wavetables
+                const wave1 = wavetables[tableIndex](phase);
+                const wave2 = tableIndex < wavetables.length - 1 ? wavetables[tableIndex + 1](phase) : wave1;
+                let wave = wave1 * (1 - tableFrac) + wave2 * tableFrac;
+
+                // Brightness: filter
+                const numHarmonics = Math.floor(2 + modBrightness * 12);
+                let filtered = 0;
+                for (let h = 1; h <= numHarmonics; h++) {
+                    filtered += (1 / h) * Math.sin(2 * Math.PI * modFrequency * h * t);
+                }
+                wave *= Math.min(1, filtered * 0.5 + 0.5);
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0008 * sample);
+
+                buffer[sample] = wave * decay * adsrEnvelope[sample] * 0.4;
+            }
+
+            return buffer;
+        }
+
+        // Braids: VOSIM (vocal synthesis)
+        function generateBraidsVosim(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // VOSIM: pulse trains with formant shaping
+                const pulseRate = modFrequency;
+                const pulsesPerCycle = Math.floor(1 + modStructure * 4); // 1-5 pulses
+
+                const cyclePhase = (t * pulseRate) % 1;
+                const pulseWidth = 0.1 / pulsesPerCycle;
+
+                let pulse = 0;
+                for (let p = 0; p < pulsesPerCycle; p++) {
+                    const pulseStart = p / pulsesPerCycle;
+                    const pulseEnd = pulseStart + pulseWidth;
+
+                    if (cyclePhase >= pulseStart && cyclePhase < pulseEnd) {
+                        const pulsePhase = (cyclePhase - pulseStart) / pulseWidth;
+                        // Decaying sine pulse
+                        const decay = Math.exp(-pulsePhase * 8);
+                        pulse = Math.sin(2 * Math.PI * pulsePhase * 3) * decay;
+                    }
+                }
+
+                // Formant filtering (brightness)
+                const formant1 = modFrequency * (2 + modBrightness * 4);
+                const formant2 = modFrequency * (4 + modBrightness * 8);
+
+                const formantSine1 = Math.sin(2 * Math.PI * formant1 * t) * 0.6;
+                const formantSine2 = Math.sin(2 * Math.PI * formant2 * t) * 0.4;
+
+                const wave = pulse * (1 + formantSine1 + formantSine2);
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0006 * sample);
+
+                buffer[sample] = wave * decay * adsrEnvelope[sample] * 0.4;
+            }
+
+            // Normalize
+            let maxAmp = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                maxAmp = Math.max(maxAmp, Math.abs(buffer[i]));
+            }
+            if (maxAmp > 0) {
+                for (let i = 0; i < buffer.length; i++) {
+                    buffer[i] *= 0.6 / maxAmp;
+                }
+            }
+
+            return buffer;
+        }
+
+        // Braids: RING (ring modulator)
+        function generateBraidsNoise(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth) {
+            const baseFrequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+            const buffer = new Float32Array(numSamples);
+
+            for (let sample = 0; sample < numSamples; sample++) {
+                const t = sample / sampleRate;
+
+                let modStructure = structure;
+                let modBrightness = brightness;
+                let modDamping = damping;
+                let modFrequency = baseFrequency;
+
+                if (lfo) {
+                    const lfoValue = lfo[sample];
+                    switch (lfoDestination) {
+                        case 'structure': modStructure = applyLFO(structure, lfoValue, lfoDepth, 'structure'); break;
+                        case 'brightness': modBrightness = applyLFO(brightness, lfoValue, lfoDepth, 'brightness'); break;
+                        case 'damping': modDamping = applyLFO(damping, lfoValue, lfoDepth, 'damping'); break;
+                        case 'pitch': modFrequency = applyLFO(baseFrequency, lfoValue, lfoDepth, 'pitch'); break;
+                    }
+                }
+
+                // Ring modulation: carrier * modulator
+                const carrierFreq = modFrequency;
+                const modRatio = 0.5 + modStructure * 3.5; // 0.5-4
+                const modFreq = carrierFreq * modRatio;
+
+                const carrier = Math.sin(2 * Math.PI * carrierFreq * t);
+                const modulator = Math.sin(2 * Math.PI * modFreq * t);
+
+                let ring = carrier * modulator;
+
+                // Brightness: add harmonics of ring modulated signal
+                for (let h = 2; h <= 3; h++) {
+                    const harmAmp = (1 / h) * modBrightness;
+                    ring += harmAmp * Math.sin(2 * Math.PI * carrierFreq * h * t) * Math.sin(2 * Math.PI * modFreq * h * t);
+                }
+
+                // Damping
+                const decay = Math.exp(-(1 - modDamping) * 0.0008 * sample);
+
+                buffer[sample] = ring * decay * adsrEnvelope[sample] * 0.5;
+            }
+
+            return buffer;
+        }
+
+        // Main sample generation function
+        function generateSample(midiNote, sampleRate, durationMs, mode, structure, brightness, damping, position, attack, decay, sustain, release, excitationType, excitationIntensity, lfoEnabled, lfoDestination, lfoWaveform, lfoRate, lfoDepth) {
+            const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const numSamples = Math.floor(sampleRate * durationMs / 1000);
+
+            // Generate envelope and excitation
+            const adsrEnvelope = generateEnvelope(numSamples, sampleRate, attack, decay, sustain, release, durationMs);
+            const excitationSignal = generateExcitation(numSamples, sampleRate, excitationType, excitationIntensity, frequency, position);
+
+            // Generate LFO if enabled
+            let lfo = null;
+            if (lfoEnabled) {
+                lfo = generateLFO(numSamples, sampleRate, lfoRate, lfoWaveform);
+            }
+
+            // Call appropriate synthesis function based on model
+            switch (mode) {
+                // Plaits models
+                case 'plaits_pair_beater':
+                    return generatePlaitsPairBeater(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'plaits_virtual_analog':
+                    return generatePlaitsVirtualAnalog(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'plaits_waveshaping':
+                    return generatePlaitsWaveshaping(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'plaits_fm':
+                    return generatePlaitsFM(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'plaits_grain':
+                    return generatePlaitsGrain(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'plaits_additive':
+                    return generatePlaitsAdditive(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'plaits_wavetable':
+                    return generatePlaitsWavetable(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'plaits_chords':
+                    return generatePlaitsChords(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+
+                // Braids models
+                case 'braids_csaw':
+                    return generateBraidsCSAW(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'braids_morph':
+                    return generateBraidsMorph(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'braids_z_saw':
+                    return generateBraidsZSaw(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'braids_fold':
+                    return generateBraidsFold(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'braids_fm':
+                    return generateBraidsFM(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'braids_grain':
+                    return generateBraidsGrain(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'braids_vosim':
+                    return generateBraidsVosim(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+                case 'braids_noise':
+                    return generateBraidsNoise(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+
+                // Default to first Plaits model
+                default:
+                    return generatePlaitsPairBeater(midiNote, sampleRate, durationMs, structure, brightness, damping, position, adsrEnvelope, excitationSignal, lfo, lfoDestination, lfoDepth);
+            }
+        }
+
+        // Preview sound
+        document.getElementById('preview-btn').addEventListener('click', () => {
+            initAudio();
+
+            const mode = document.getElementById('synthesis-model').value;
+            const structure = parseFloat(document.getElementById('structure').value);
+            const brightness = parseFloat(document.getElementById('brightness').value);
+            const damping = parseFloat(document.getElementById('damping').value);
+            const position = parseFloat(document.getElementById('position').value);
+            const attack = parseFloat(document.getElementById('attack').value);
+            const decay = parseFloat(document.getElementById('decay').value);
+            const sustain = parseFloat(document.getElementById('sustain').value);
+            const release = parseFloat(document.getElementById('release').value);
+            const excitationType = document.getElementById('excitation-type').value;
+            const excitationIntensity = parseFloat(document.getElementById('excitation-intensity').value);
+            const lfoEnabled = document.getElementById('lfo-enabled').checked;
+            const lfoDestination = document.getElementById('lfo-destination').value;
+            const lfoWaveform = document.getElementById('lfo-waveform').value;
+            const lfoRate = parseFloat(document.getElementById('lfo-rate').value);
+            const lfoDepth = parseFloat(document.getElementById('lfo-depth').value);
+
+            const midiNote = 60; // Middle C
+            const duration = 2000; // 2 seconds
+
+            const buffer = generateSample(
+                midiNote,
+                audioContext.sampleRate,
+                duration,
+                mode,
+                structure,
+                brightness,
+                damping,
+                position,
+                attack,
+                decay,
+                sustain,
+                release,
+                excitationType,
+                excitationIntensity,
+                lfoEnabled,
+                lfoDestination,
+                lfoWaveform,
+                lfoRate,
+                lfoDepth
+            );
+
+            const audioBuffer = audioContext.createBuffer(1, buffer.length, audioContext.sampleRate);
+            audioBuffer.copyToChannel(buffer, 0);
+
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            source.start();
+
+            showStatus('Playing preview...', 'info');
+        });
+
+        // Export functions (from DX7 tool)
+        function trimSilence(buffer, thresholdDb = -60) {
+            const threshold = Math.pow(10, thresholdDb / 20);
+            const length = buffer.length;
+
+            let startFrame = 0;
+            let endFrame = length - 1;
+
+            // Find start (first sample above threshold)
+            for (let i = 0; i < length; i++) {
+                if (Math.abs(buffer[i]) > threshold) {
+                    startFrame = i;
+                    break;
+                }
+            }
+
+            // Find end (last sample above threshold)
+            for (let i = length - 1; i >= startFrame; i--) {
+                if (Math.abs(buffer[i]) > threshold) {
+                    endFrame = i;
+                    break;
+                }
+            }
+
+            // Extract trimmed portion
+            const trimmedLength = endFrame - startFrame + 1;
+            const trimmed = new Float32Array(trimmedLength);
+            for (let i = 0; i < trimmedLength; i++) {
+                trimmed[i] = buffer[startFrame + i];
+            }
+
+            return trimmed;
+        }
+
+        function generateWav16Bit(buffer, sampleRate) {
+            const numSamples = buffer.length;
+            const dataSize = numSamples * 2;
+            const fileSize = 44 + dataSize;
+            const wavBuffer = new ArrayBuffer(fileSize);
+            const view = new DataView(wavBuffer);
+
+            function writeString(view, offset, string) {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            }
+
+            // WAV header
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, fileSize - 8, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            let offset = 44;
+            for (let i = 0; i < numSamples; i++) {
+                const sample = Math.max(-1.0, Math.min(1.0, buffer[i]));
+                const sample16 = Math.round(sample * 32767);
+                view.setInt16(offset, sample16, true);
+                offset += 2;
+            }
+
+            return new Uint8Array(wavBuffer);
+        }
+
+        function generateOpxyPatch(name, slices, sampleRate) {
+            const regions = [];
+
+            for (let i = 0; i < slices.length; i++) {
+                const slice = slices[i];
+                const prevNote = i > 0 ? slices[i - 1].pitch : 0;
+                const nextNote = i < slices.length - 1 ? slices[i + 1].pitch : 127;
+
+                const lokey = i === 0 ? 0 : Math.floor((prevNote + slice.pitch) / 2) + 1;
+                const hikey = i === slices.length - 1 ? 127 : Math.floor((slice.pitch + nextNote) / 2);
+
+                const framecount = slice.framecount;
+                const loopEnd = Math.max(0, framecount - 2000);
+
+                regions.push({
+                    "sample": slice.filename,
+                    "pitch.keycenter": slice.pitch,
+                    "lokey": lokey,
+                    "hikey": hikey,
+                    "loop.start": 0,
+                    "loop.end": loopEnd,
+                    "loop.enabled": true,
+                    "loop.onrelease": true,
+                    "loop.crossfade": 0,
+                    "gain": 0,
+                    "reverse": false,
+                    "sample.start": 0,
+                    "sample.end": framecount,
+                    "framecount": framecount
+                });
+            }
+
+            const patch = {
+                "engine": {
+                    "bendrange": 8191,
+                    "highpass": 0,
+                    "playmode": "poly",
+                    "transpose": 0,
+                    "portamento.amount": 0,
+                    "portamento.type": 32767,
+                    "tuning.root": 0,
+                    "tuning.scale": 0,
+                    "velocity.sensitivity": 19660,
+                    "volume": 18348,
+                    "width": 0,
+                    "modulation": {
+                        "aftertouch": {"amount": 16383, "target": 0},
+                        "modwheel": {"amount": 16383, "target": 0},
+                        "pitchbend": {"amount": 16383, "target": 0},
+                        "velocity": {"amount": 16383, "target": 0}
+                    },
+                    "params": [16384, 16384, 16384, 16384, 16384, 16384, 16384, 16384]
+                },
+                "envelope": {
+                    "amp": {"attack": 0, "decay": 0, "release": 25722, "sustain": 32767},
+                    "filter": {"attack": 0, "decay": 0, "release": 19968, "sustain": 32767}
+                },
+                "fx": {
+                    "active": true,
+                    "params": [32767, 0, 15009, 32767, 0, 32767, 6553, 9830],
+                    "type": "ladder"
+                },
+                "lfo": {
+                    "active": false,
+                    "params": [20309, 5679, 19114, 15807, 0, 0, 0, 12287],
+                    "type": "random"
+                },
+                "platform": "OP-XY",
+                "type": "multisampler",
+                "version": 4,
+                "regions": regions,
+                "rootFolderName": name
+            };
+
+            return JSON.stringify(patch, null, 2);
+        }
+
+        // Download multisample
+        document.getElementById('download-btn').addEventListener('click', async () => {
+            try {
+                initAudio();
+
+                const mode = document.getElementById('synthesis-model').value;
+                const structure = parseFloat(document.getElementById('structure').value);
+                const brightness = parseFloat(document.getElementById('brightness').value);
+                const damping = parseFloat(document.getElementById('damping').value);
+                const position = parseFloat(document.getElementById('position').value);
+                const attack = parseFloat(document.getElementById('attack').value);
+                const decay = parseFloat(document.getElementById('decay').value);
+                const sustain = parseFloat(document.getElementById('sustain').value);
+                const release = parseFloat(document.getElementById('release').value);
+                const excitationType = document.getElementById('excitation-type').value;
+                const excitationIntensity = parseFloat(document.getElementById('excitation-intensity').value);
+                const lfoEnabled = document.getElementById('lfo-enabled').checked;
+                const lfoDestination = document.getElementById('lfo-destination').value;
+                const lfoWaveform = document.getElementById('lfo-waveform').value;
+                const lfoRate = parseFloat(document.getElementById('lfo-rate').value);
+                const lfoDepth = parseFloat(document.getElementById('lfo-depth').value);
+                const outputName = document.getElementById('output-name').value.trim();
+                const duration = parseInt(document.getElementById('duration').value);
+                const minNote = parseInt(document.getElementById('min-note').value);
+                const maxNote = parseInt(document.getElementById('max-note').value);
+                const increment = parseInt(document.getElementById('note-increment').value);
+
+                if (!outputName) {
+                    showStatus('Error: Output name cannot be empty', 'error');
+                    return;
+                }
+
+                if (minNote > maxNote) {
+                    showStatus('Error: Min note must be <= max note', 'error');
+                    return;
+                }
+
+                showStatus('Generating OP-XY preset...', 'info');
+
+                // Generate MIDI note array
+                const midiNotes = [];
+                for (let note = minNote; note <= maxNote; note += increment) {
+                    midiNotes.push(note);
+                }
+                if (midiNotes[midiNotes.length - 1] !== maxNote) {
+                    midiNotes.push(maxNote);
+                }
+
+                // Generate samples
+                const bufs = new Map();
+                const sampleRate = audioContext.sampleRate;
+
+                for (const midiNote of midiNotes) {
+                    const buf = generateSample(
+                        midiNote,
+                        sampleRate,
+                        duration,
+                        mode,
+                        structure,
+                        brightness,
+                        damping,
+                        position,
+                        attack,
+                        decay,
+                        sustain,
+                        release,
+                        excitationType,
+                        excitationIntensity,
+                        lfoEnabled,
+                        lfoDestination,
+                        lfoWaveform,
+                        lfoRate,
+                        lfoDepth
+                    );
+                    bufs.set(midiNote, buf);
+                }
+
+                // Generate OP-XY format
+                const zip = new JSZip();
+                const sortedPitches = Array.from(bufs.keys()).sort((a, b) => a - b);
+                const slices = [];
+
+                for (const pitch of sortedPitches) {
+                    const buf = bufs.get(pitch);
+                    const trimmedBuf = trimSilence(buf, -60);
+
+                    const noteName = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][pitch % 12];
+                    const octave = Math.floor(pitch / 12) - 1;
+                    const fullNoteName = `${noteName}${octave}`;
+                    const filename = `${outputName} ${fullNoteName}.wav`;
+
+                    const wavData = generateWav16Bit(trimmedBuf, sampleRate);
+
+                    slices.push({
+                        pitch: pitch,
+                        filename: filename,
+                        framecount: trimmedBuf.length
+                    });
+
+                    const folder = zip.folder(`${outputName}.preset`);
+                    folder.file(filename, wavData);
+                }
+
+                const patchJson = generateOpxyPatch(outputName, slices, sampleRate);
+                const folder = zip.folder(`${outputName}.preset`);
+                folder.file('patch.json', patchJson);
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+                // Download
+                const url = URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${outputName}.preset.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showStatus('OP-XY preset downloaded!', 'success');
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+
+        // Preview min/max note buttons
+        document.getElementById('preview-min-btn').addEventListener('click', () => {
+            const minNote = parseInt(document.getElementById('min-note').value);
+            previewNote(minNote);
+        });
+
+        document.getElementById('preview-max-btn').addEventListener('click', () => {
+            const maxNote = parseInt(document.getElementById('max-note').value);
+            previewNote(maxNote);
+        });
+
+        // Update note names when inputs change
+        document.getElementById('min-note').addEventListener('input', updateNoteNames);
+        document.getElementById('max-note').addEventListener('input', updateNoteNames);
+
+        // Initialize note names and visual keyboard on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateNoteNames();
+            updateSynthesisModels(); // Initialize synthesis model dropdown
+
+            // Add event listener for module changes
+            document.getElementById('mi-module').addEventListener('change', updateSynthesisModels);
+        });
+    </script>
+</body>
+</html>
