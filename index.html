@@ -249,6 +249,16 @@
             <span id="iterate-amount-value" style="font-size: 11px; min-width: 30px; color: #e8e6e3;">15%</span>
         </div>
         <button id="preview-btn">▶ Preview</button>
+        <div style="display: flex; align-items: center; gap: 6px; background: #252525; padding: 4px 10px; border-radius: 4px; border: 1px solid #3a3a3a;">
+            <label style="font-size: 11px; margin: 0; color: #4da6ff;">
+                <input type="checkbox" id="auto-preview" checked style="width: auto; margin-right: 4px;">
+                Auto-Preview
+            </label>
+        </div>
+        <div id="midi-status" style="display: flex; align-items: center; gap: 6px; background: #252525; padding: 4px 10px; border-radius: 4px; border: 1px solid #3a3a3a;">
+            <span style="font-size: 11px; color: #666;">🎹 MIDI: </span>
+            <span id="midi-status-text" style="font-size: 11px; color: #666;">Checking...</span>
+        </div>
     </div>
 
     <div class="grid-2">
@@ -607,6 +617,65 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
+
+        // MIDI support
+        let midiAccess = null;
+        let activeMidiNotes = new Set();
+
+        async function initMIDI() {
+            try {
+                if (navigator.requestMIDIAccess) {
+                    midiAccess = await navigator.requestMIDIAccess();
+                    document.getElementById('midi-status-text').textContent = 'Connected';
+                    document.getElementById('midi-status-text').style.color = '#4caf50';
+
+                    // Listen for MIDI inputs
+                    midiAccess.inputs.forEach(input => {
+                        input.onmidimessage = handleMIDIMessage;
+                    });
+
+                    // Update status when devices change
+                    midiAccess.onstatechange = (e) => {
+                        if (e.port.type === 'input') {
+                            if (e.port.state === 'connected') {
+                                document.getElementById('midi-status-text').textContent = `Connected: ${e.port.name}`;
+                                e.port.onmidimessage = handleMIDIMessage;
+                            } else {
+                                document.getElementById('midi-status-text').textContent = 'Disconnected';
+                                document.getElementById('midi-status-text').style.color = '#ff914d';
+                            }
+                        }
+                    };
+
+                    showStatus('MIDI enabled! Play notes on your MIDI keyboard.', 'success');
+                } else {
+                    document.getElementById('midi-status-text').textContent = 'Not Supported';
+                    document.getElementById('midi-status-text').style.color = '#666';
+                }
+            } catch (err) {
+                console.error('MIDI access failed:', err);
+                document.getElementById('midi-status-text').textContent = 'Error';
+                document.getElementById('midi-status-text').style.color = '#f44336';
+            }
+        }
+
+        function handleMIDIMessage(message) {
+            const [status, note, velocity] = message.data;
+            const command = status & 0xf0;
+
+            if (command === 0x90 && velocity > 0) {
+                // Note On
+                initAudio();
+                activeMidiNotes.add(note);
+                previewNote(note);
+            } else if (command === 0x80 || (command === 0x90 && velocity === 0)) {
+                // Note Off
+                activeMidiNotes.delete(note);
+            }
+        }
+
+        // Initialize MIDI on page load
+        initMIDI();
 
         // MI Module definitions - 8 models from each module
         const MI_MODULES = {
@@ -1217,6 +1286,13 @@
             }
 
             showStatus(`🔄 Iterated with ${Math.round(amount * 100)}% variation`, 'info');
+
+            // Auto-preview if enabled
+            if (document.getElementById('auto-preview').checked) {
+                setTimeout(() => {
+                    document.getElementById('preview-btn').click();
+                }, 100); // Small delay to let sliders update
+            }
         }
 
         // Generate short preset name with abbreviations
@@ -1280,6 +1356,13 @@
             // Update output name with abbreviations
             const outputName = generateShortPresetName();
             document.getElementById('output-name').value = outputName;
+
+            // Auto-preview if enabled
+            if (document.getElementById('auto-preview').checked) {
+                setTimeout(() => {
+                    document.getElementById('preview-btn').click();
+                }, 100);
+            }
         });
 
         // Individual section randomization functions
@@ -1407,6 +1490,13 @@
             document.getElementById('output-name').value = outputName;
 
             showStatus('🎲 RANDOMIZED EVERYTHING! 🎲', 'success');
+
+            // Auto-preview if enabled
+            if (document.getElementById('auto-preview').checked) {
+                setTimeout(() => {
+                    document.getElementById('preview-btn').click();
+                }, 100);
+            }
         }
 
         // Wire up all randomize buttons
